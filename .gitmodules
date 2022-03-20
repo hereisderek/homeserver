@@ -1,0 +1,3 @@
+[submodule "profiles/derek"]
+	path = profiles/derek
+	url = git@github.com:hereisderek/homeserver_profile.git

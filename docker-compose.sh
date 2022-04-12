@@ -101,7 +101,7 @@ function mergeEnv() {
     local filtered_files=()
 
     for env in ${env_files}; do 
-        [[ -f $env ]] && filtered_files+="$env"
+        [[ -f $env ]] && filtered_files+="$env "
     done
 
     echo "merging into ${output} for env files: ${filtered_files}, original env_files:$env_files"

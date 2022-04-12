@@ -1,0 +1,186 @@
+version: "3.7"
+
+networks:
+  default:
+    name: home_service
+    driver: bridge
+
+services:
+  sonarr:
+    image: lscr.io/linuxserver/sonarr
+    # depends_on:
+    #   - rclone_mount
+    ports:
+      - ${SONARR_PORT_8989}:8989
+    container_name: sonarr
+    environment:
+      - PGID=${PGID}
+      - PUID=${PUID}
+      - TZ=${TZ}
+    logging:
+      driver: json-file
+      options:
+        max-file: ${BASE_LOGGING_MAXFILE}
+        max-size: ${BASE_LOGGING_MAXSIZE}
+    restart: ${BASE_RESTART_STRATEGY}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${BASE_DATA_DIR}/sonarr:/config
+      - ${MEDIA_LIB_DIR}:/storage
+      
+  radarr:
+    image: lscr.io/linuxserver/radarr
+    ports:
+      - ${RADARR_PORT_7878}:7878
+    container_name: radarr
+    environment:
+      - PGID=${PGID}
+      - PUID=${PUID}
+      - TZ=${TZ}
+    logging:
+      driver: json-file
+      options:
+        max-file: ${BASE_LOGGING_MAXFILE}
+        max-size: ${BASE_LOGGING_MAXSIZE}
+    restart: ${BASE_RESTART_STRATEGY}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${BASE_DATA_DIR}/radarr:/config
+      - ${MEDIA_LIB_DIR}:/storage
+  
+  bazarr:
+    image: lscr.io/linuxserver/bazarr
+    ports:
+      - ${BAZARR_PORT_6767}:6767
+    container_name: bazarr
+    environment:
+      - PGID=${PGID}
+      - PUID=${PUID}
+      - TZ=${TZ}
+    logging:
+      driver: json-file
+      options:
+        max-file: ${BASE_LOGGING_MAXFILE}
+        max-size: ${BASE_LOGGING_MAXSIZE}
+    restart: ${BASE_RESTART_STRATEGY}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${BASE_DATA_DIR}/bazarr:/config
+      - ${MEDIA_LIB_DIR}:/storage
+
+  lidarr:
+    image: lscr.io/linuxserver/lidarr
+    ports:
+      - ${LIDARR_PORT_8686}:8686
+    container_name: lidarr
+    environment:
+      - PGID=${PGID}
+      - PUID=${PUID}
+      - TZ=${TZ}
+    logging:
+      driver: json-file
+      options:
+        max-file: ${BASE_LOGGING_MAXFILE}
+        max-size: ${BASE_LOGGING_MAXSIZE}
+    restart: ${BASE_RESTART_STRATEGY}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${BASE_DATA_DIR}/lidarr:/config
+      - ${MEDIA_LIB_DIR}:/storage
+
+  readarr:
+    # image: hotio/readarr:nightly
+    image: ghcr.io/linuxserver/readarr:nightly
+    container_name: readarr
+    ports:
+      - ${READARR_PORT_8686}:8686
+      # - ${READARR_PORT_8787}:8787
+    environment:
+      - PGID=${PGID}
+      - PUID=${PUID}
+      - TZ=${TZ}
+    logging:
+      driver: json-file
+      options:
+        max-file: ${BASE_LOGGING_MAXFILE}
+        max-size: ${BASE_LOGGING_MAXSIZE}
+    restart: ${BASE_RESTART_STRATEGY}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${BASE_DATA_DIR}/lidarr:/config
+      - ${MEDIA_LIB_DIR}:/storage
+
+
+  calibre:
+    image: lscr.io/linuxserver/calibre
+    container_name: calibre
+    environment:
+      - PGID=${PGID}
+      - PUID=${PUID}
+      - TZ=${TZ}
+      - PASSWORD= #optional
+      - CLI_ARGS= #optional
+    volumes:
+      - ${BASE_DATA_DIR}/calibre:/config
+      - ${MEDIA_LIB_DIR}:/storage
+    ports:
+      - ${CALIBRE_DESKTOP_8080}:8080
+      - ${CALIBRE_WEBSERVER_8081}:8081
+    restart: unless-stopped
+
+  prowlarr:
+    image: linuxserver/prowlarr:nightly
+    container_name: prowlarr
+    ports:
+      - ${PROWLARR_PORT_9696}:9696
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ={TZ}
+    logging:
+      driver: json-file
+      options:
+        max-file: ${BASE_LOGGING_MAXFILE}
+        max-size: ${BASE_LOGGING_MAXSIZE}
+    restart: ${BASE_RESTART_STRATEGY}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${BASE_DATA_DIR}/prowlarr:/config
+      - ${MEDIA_LIB_DIR}:/storage
+
+  jackett:
+    image: lscr.io/linuxserver/jackett
+    ports:
+      - ${JACKETT_PORT_9117}:9117
+    container_name: jackett
+    environment:
+      - PGID=${PGID}
+      - PUID=${PUID}
+      - TZ=${TZ}
+      - AUTO_UPDATE=true
+    logging:
+      driver: json-file
+      options:
+        max-file: ${BASE_LOGGING_MAXFILE}
+        max-size: ${BASE_LOGGING_MAXSIZE}
+    restart: ${BASE_RESTART_STRATEGY}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${BASE_DATA_DIR}/jackett:/config
+      - ${BASE_CACHE_DIR}/jackett/downloads:/downloads
+
+
+  flaresolverr:
+    # DockerHub mirror flaresolverr/flaresolverr:latest
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    container_name: flaresolverr
+    environment:
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - LOG_HTML=${LOG_HTML:-false}
+      - CAPTCHA_SOLVER=${CAPTCHA_SOLVER:-none}
+      - PGID=${PGID}
+      - PUID=${PUID}
+      - TZ=${TZ}
+    ports:
+      - "${FLARE_SOLVER_PORT_8191:-8191}:8191"
+    restart: unless-stopped 

@@ -1,0 +1,47 @@
+version: "3.7"
+
+networks:
+  default:
+    name: home_service
+    driver: bridge
+
+  services:
+
+    jellyfin:
+    # image: lscr.io/linuxserver/jellyfin:nightly
+    image: nyanmisaka/jellyfin:latest
+    container_name: jellyfin
+    runtime: nvidia
+    # privileged: true
+    environment:
+      - TZ=${TZ}
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - NVIDIA_DRIVER_CAPABILITIES=all
+      - NVIDIA_VISIBLE_DEVICES=all
+      - JELLYFIN_PublishedServerUrl=192.168.50.12 #optional
+    volumes:
+      - ${BASE_DATA_DIR}/jellyfin:/config
+      - ${JELLYFIN_CACHE_DIR}:/config/cache
+      - ${JELLYFIN_METADATA_DIR}:/config/data/metadata
+      - ${JELLYFIN_TRANSCODE_DIR}:/config/data/transcodes
+      - ${HOME_SCRIPT_STORAGE}:/storage
+    restart: ${BASE_RESTART_STRATEGY}  
+    ports:
+      - ${JELLYFIN_WEB_8096}:8096
+      # - 8920:8920 #optional
+      - ${JELLYFIN_PORT_7359}:7359/udp #optional
+      - ${JELLYFIN_PORT_1900}:1900/udp #optional
+    devices:
+      - /dev/dri:/dev/dri
+      - /dev/nvidia0:/dev/nvidia0
+      - /dev/nvidia1:/dev/nvidia1
+      - /dev/nvidia2:/dev/nvidia2
+      - dev/nvidiactl:dev/nvidiactl
+      - dev/nvidia-uvm:dev/nvidia-uvm
+      - dev/nvidia-uvm-tools:/dev/nvidia-uvm-tools
+    deploy:
+      resources:
+        reservations:
+          devices:
+          - capabilities: [gpu]

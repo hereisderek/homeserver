@@ -1,0 +1,489 @@
+version: "3.7"
+
+networks:
+  default:
+    name: home_service
+    driver: bridge
+
+
+services:
+  # https://github.com/qdm12/gluetun
+  gluetun:
+    container_name: gluetun
+    image: qmcgaw/gluetun
+    depends_on:
+      - rclone_mount
+    cap_add:
+      - NET_ADMIN
+    profiles:
+      - vpn
+    ports:
+      - 8888:8888/tcp # HTTP proxy
+      - 8388:8388/tcp # Shadowsocks
+      - 8388:8388/udp # Shadowsocks
+    volumes:
+      - /yourpath:/gluetun
+    environment:
+      - TZ=${TZ}
+      - PGID=${PGID}
+      - PUID=${PUID}
+      - VPNSP=purevpn
+      - OPENVPN_USER=abc
+      - OPENVPN_PASSWORD=abc
+      # - COUNTRY=Netherlands
+
+  torrentvpn:
+    container_name: torrentvpn
+    image: dperson/openvpn-client
+    profiles:
+      - vpn
+    volumes:
+        - ./config/vpn/:/vpn/
+    cap_add:
+      - net_admin
+    environment:
+      - PGID=${PGID}
+      - PUID=${PUID}
+      - TZ=${TZ}
+    networks:
+      - default
+      - torrentvpn
+    # ports:
+    #   - ${QBIT_MANAGE_PORT_8080}:8080
+    sysctls:
+      - net.ipv6.conf.all.disable_ipv6=0
+    # if using '-d' or 'DNS' you can't enable the `read_only: true` option
+    read_only: true
+    tmpfs:
+      - /run
+      - /tmp
+    restart: unless-stopped
+    security_opt:
+      - label:disable
+    devices:
+      - /dev/net/tun:/dev/net/tun
+
+
+
+
+
+  portaineragent:
+    image: portainer/agent
+    ports:
+      - ${PORTAINERAGENT_PORT_9001}:9001
+    container_name: portaineragent
+    environment:
+      - CAP_HOST_MANAGEMENT=1
+      - TZ=${TZ}
+    logging:
+      driver: json-file
+      options:
+        max-file: ${BASE_LOGGING_MAXFILE}
+        max-size: ${BASE_LOGGING_MAXSIZE}
+    restart: ${BASE_RESTART_STRATEGY}
+    volumes:
+      - /:/host
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/lib/docker/volumes:/var/lib/docker/volumes
+
+  portainer:
+    image: portainer/portainer-ce
+    ports:
+      - ${PORTAINER_PORT_9000}:9000
+    command: -H unix:///var/run/docker.sock
+    container_name: portainer
+    environment:
+      - TZ=${TZ}
+    logging:
+      driver: json-file
+      options:
+        max-file: ${BASE_LOGGING_MAXFILE}
+        max-size: ${BASE_LOGGING_MAXSIZE}
+    restart: ${BASE_RESTART_STRATEGY}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${BASE_DATA_DIR}/portainer:/data
+      - ${HOME_SCRIPT_STORAGE}:/storage
+
+  watchtower:
+    container_name: watchtower
+    image: containrrr/watchtower 
+    environment:
+      - PGID=${PGID}
+      - PUID=${PUID}
+      - TZ=${TZ}
+      - WATCHTOWER_HTTP_API=true
+      - WATCHTOWER_HTTP_API_TOKEN=watchtower
+      - WATCHTOWER_ROLLING_RESTART=true
+    volumes:
+      # - ${BASE_CACHE_DIR}/watchtower/config.json:/config.json
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --cleanup --no-restart --http-api-metrics
+
+  rclone_mount:
+    image: hereisderek/rclone_mergerfs_mounter:nightly
+    container_name: rclone_mount
+    privileged: true
+    security_opt:
+      - seccomp:unconfined
+    devices:
+      - /dev/fuse:/dev/fuse
+    ports:
+      - ${RCLONE_MOUNT_PORT_5572}:5572
+    cap_add:
+      - SYS_ADMIN
+      - SETPCAP
+      - MKNOD
+    environment:
+      - PGID=${PGID}
+      - PUID=${PUID}
+      - TZ=${TZ}
+      - RC_USER=${RC_USER}
+      - RC_PASS=${RC_PASS}
+      - USE_RCD=false
+      - PARAMS_COMMON_EXTRA=-vv
+      - RCLONE_REMOTE="share"
+      - RC_SERVE=true 
+      - RC_ENABLE_METRICS=true
+
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${BASE_DATA_DIR}/rclone:/config/rclone
+      - ${BASE_CACHE_DIR}/rclone_mount:/cache
+      - ${RCLONE_MOUNT_MERGERFS_LOCAL}:/storage
+    
+
+
+
+  sonarr:
+    image: lscr.io/linuxserver/sonarr
+    depends_on:
+      - rclone_mount
+    ports:
+      - ${SONARR_PORT_8989}:8989
+    container_name: sonarr
+    environment:
+      - PGID=${PGID}
+      - PUID=${PUID}
+      - TZ=${TZ}
+    logging:
+      driver: json-file
+      options:
+        max-file: ${BASE_LOGGING_MAXFILE}
+        max-size: ${BASE_LOGGING_MAXSIZE}
+    restart: ${BASE_RESTART_STRATEGY}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${BASE_DATA_DIR}/sonarr:/config
+      - ${HOME_SCRIPT_STORAGE}:/storage
+      
+  radarr:
+    image: lscr.io/linuxserver/radarr
+    depends_on:
+      - rclone_mount
+    ports:
+      - ${RADARR_PORT_7878}:7878
+    container_name: radarr
+    environment:
+      - PGID=${PGID}
+      - PUID=${PUID}
+      - TZ=${TZ}
+    logging:
+      driver: json-file
+      options:
+        max-file: ${BASE_LOGGING_MAXFILE}
+        max-size: ${BASE_LOGGING_MAXSIZE}
+    restart: ${BASE_RESTART_STRATEGY}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${BASE_DATA_DIR}/radarr:/config
+      - ${HOME_SCRIPT_STORAGE}:/storage
+  
+  bazarr:
+    image: lscr.io/linuxserver/bazarr
+    depends_on:
+      - rclone_mount
+    ports:
+      - ${BAZARR_PORT_6767}:6767
+    container_name: bazarr
+    environment:
+      - PGID=${PGID}
+      - PUID=${PUID}
+      - TZ=${TZ}
+    logging:
+      driver: json-file
+      options:
+        max-file: ${BASE_LOGGING_MAXFILE}
+        max-size: ${BASE_LOGGING_MAXSIZE}
+    restart: ${BASE_RESTART_STRATEGY}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${BASE_DATA_DIR}/bazarr:/config
+      - ${HOME_SCRIPT_STORAGE}:/storage
+
+  lidarr:
+    image: lscr.io/linuxserver/lidarr
+    depends_on:
+      - rclone_mount
+    ports:
+      - ${LIDARR_PORT_8686}:8686
+    container_name: lidarr
+    environment:
+      - PGID=${PGID}
+      - PUID=${PUID}
+      - TZ=${TZ}
+    logging:
+      driver: json-file
+      options:
+        max-file: ${BASE_LOGGING_MAXFILE}
+        max-size: ${BASE_LOGGING_MAXSIZE}
+    restart: ${BASE_RESTART_STRATEGY}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${BASE_DATA_DIR}/lidarr:/config
+      - ${HOME_SCRIPT_STORAGE}:/storage
+
+  readarr:
+    # image: hotio/readarr:nightly
+    image: ghcr.io/linuxserver/readarr:nightly
+    depends_on:
+      - rclone_mount
+    container_name: readarr
+    ports:
+      - ${READARR_PORT_8686}:8686
+      # - ${READARR_PORT_8787}:8787
+    environment:
+      - PGID=${PGID}
+      - PUID=${PUID}
+      - TZ=${TZ}
+    logging:
+      driver: json-file
+      options:
+        max-file: ${BASE_LOGGING_MAXFILE}
+        max-size: ${BASE_LOGGING_MAXSIZE}
+    restart: ${BASE_RESTART_STRATEGY}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${BASE_DATA_DIR}/lidarr:/config
+      - ${HOME_SCRIPT_STORAGE}:/storage
+
+
+  calibre:
+    image: lscr.io/linuxserver/calibre
+    depends_on:
+      - rclone_mount
+    container_name: calibre
+    environment:
+      - PGID=${PGID}
+      - PUID=${PUID}
+      - TZ=${TZ}
+      - PASSWORD= #optional
+      - CLI_ARGS= #optional
+    volumes:
+      - ${BASE_DATA_DIR}/calibre:/config
+      - ${HOME_SCRIPT_STORAGE}:/storage
+    ports:
+      - ${CALIBRE_DESKTOP_8080}:8080
+      - ${CALIBRE_WEBSERVER_8081}:8081
+    restart: unless-stopped
+
+  prowlarr:
+    image: linuxserver/prowlarr:nightly
+    container_name: prowlarr
+    ports:
+      - ${PROWLARR_PORT_9696}:9696
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ={TZ}
+    logging:
+      driver: json-file
+      options:
+        max-file: ${BASE_LOGGING_MAXFILE}
+        max-size: ${BASE_LOGGING_MAXSIZE}
+    restart: ${BASE_RESTART_STRATEGY}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${BASE_DATA_DIR}/prowlarr:/config
+      - ${HOME_SCRIPT_STORAGE}:/storage
+
+  jackett:
+    image: lscr.io/linuxserver/jackett
+    ports:
+      - ${JACKETT_PORT_9117}:9117
+    container_name: jackett
+    environment:
+      - PGID=${PGID}
+      - PUID=${PUID}
+      - TZ=${TZ}
+      - AUTO_UPDATE=true
+    logging:
+      driver: json-file
+      options:
+        max-file: ${BASE_LOGGING_MAXFILE}
+        max-size: ${BASE_LOGGING_MAXSIZE}
+    restart: ${BASE_RESTART_STRATEGY}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${BASE_DATA_DIR}/jackett:/config
+      - ${BASE_CACHE_DIR}/jackett/downloads:/downloads
+
+
+  flaresolverr:
+    # DockerHub mirror flaresolverr/flaresolverr:latest
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    container_name: flaresolverr
+    environment:
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - LOG_HTML=${LOG_HTML:-false}
+      - CAPTCHA_SOLVER=${CAPTCHA_SOLVER:-none}
+      - PGID=${PGID}
+      - PUID=${PUID}
+      - TZ=${TZ}
+    ports:
+      - "${FLARE_SOLVER_PORT_8191:-8191}:8191"
+    restart: unless-stopped 
+
+
+  jellyfin:
+    image: lscr.io/linuxserver/jellyfin:nightly
+    depends_on:
+      - rclone_mount
+    container_name: jellyfin
+    runtime: nvidia
+    # privileged: true
+    environment:
+      - TZ=${TZ}
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - NVIDIA_DRIVER_CAPABILITIES=all
+      - NVIDIA_VISIBLE_DEVICES=all
+      - JELLYFIN_PublishedServerUrl=192.168.50.12 #optional
+    volumes:
+      - ${BASE_DATA_DIR}/jellyfin:/config
+      - ${JELLYFIN_CACHE_DIR}:/config/cache
+      - ${JELLYFIN_METADATA_DIR}:/config/data/metadata
+      - ${JELLYFIN_TRANSCODE_DIR}:/config/data/transcodes
+      - ${HOME_SCRIPT_STORAGE}:/storage
+    restart: ${BASE_RESTART_STRATEGY}  
+    ports:
+      - ${JELLYFIN_WEB_8096}:8096
+      # - 8920:8920 #optional
+      - ${JELLYFIN_PORT_7359}:7359/udp #optional
+      - ${JELLYFIN_PORT_1900}:1900/udp #optional
+    devices:
+      - /dev/dri:/dev/dri
+      - /dev/nvidia0:/dev/nvidia0
+      - /dev/nvidia1:/dev/nvidia1
+      - /dev/nvidia2:/dev/nvidia2
+      - dev/nvidiactl:dev/nvidiactl
+      - dev/nvidia-uvm:dev/nvidia-uvm
+      - dev/nvidia-uvm-tools:/dev/nvidia-uvm-tools
+    deploy:
+      resources:
+        reservations:
+          devices:
+          - capabilities: [gpu]
+
+
+  duplicati:
+    image: lscr.io/linuxserver/duplicati
+    container_name: duplicati
+    logging:
+      driver: json-file
+      options:
+        max-file: ${BASE_LOGGING_MAXFILE}
+        max-size: ${BASE_LOGGING_MAXSIZE}
+    restart: ${BASE_RESTART_STRATEGY}
+    environment:
+      - PGID=${PGID}
+      - PUID=${PUID}
+      - TZ=${TZ}
+      - CLI_ARGS= #optional
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${BASE_DATA_DIR}/duplicati:/config
+      - ${HOME_SCRIPT_STORAGE}:/storage
+
+      - /media/data2/backups:/backups
+      - ${BASE_DATA_DIR}:/source
+    ports:
+      - ${DUPLICATI_PORT_8200}:8200
+
+
+
+  
+  qbittorrent:
+    container_name: qbittorrent
+    image: hotio/qbittorrent
+    depends_on:
+      - rclone_mount
+    # network_mode: "service:gluetun"
+    ports:
+      - ${QBIT_MANAGE_PORT_8080}:8080
+      - ${QBIT_PORT_9000}:9000
+    environment:
+      - PGID=${PGID}
+      - PUID=${PUID}
+      - TZ=${TZ}
+    logging:
+      driver: json-file
+      options:
+        max-file: ${BASE_LOGGING_MAXFILE}
+        max-size: ${BASE_LOGGING_MAXSIZE}
+    restart: ${BASE_RESTART_STRATEGY}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${BASE_DATA_DIR}/qbittorrent:/config
+      - ${HOME_SCRIPT_STORAGE}:/storage
+
+  nzbget:
+    image: lscr.io/linuxserver/nzbget
+    depends_on:
+      - rclone_mount
+    ports:
+      - ${NZBGET_PORT_6789:-6789}:6789
+    container_name: nzbget
+    environment:
+      - PGID=${PGID}
+      - PUID=${PUID}
+      - TZ=${TZ}
+    logging:
+      driver: json-file
+      options:
+        max-file: ${BASE_LOGGING_MAXFILE}
+        max-size: ${BASE_LOGGING_MAXSIZE}
+    restart: ${BASE_RESTART_STRATEGY}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${BASE_DATA_DIR}/nzbget:/config
+      - ${HOME_SCRIPT_STORAGE}:/storage
+
+  transmission:
+    image: lscr.io/linuxserver/transmission
+    depends_on:
+      - rclone_mount
+    ports:
+      - ${TRANSMISSION_PORT_51413}:51413
+      - ${TRANSMISSION_PORT_51413}:51413/udp
+      - ${TRANSMISSION_PORT_6881}:6881
+      - ${TRANSMISSION_PORT_6881}:6881/udp
+      - ${TRANSMISSION_PORT_9091}:9091
+    container_name: transmission
+    environment:
+      - PGID=${PGID}
+      - PUID=${PUID}
+      - TZ=${TZ}
+    logging:
+      driver: json-file
+      options:
+        max-file: ${BASE_LOGGING_MAXFILE}
+        max-size: ${BASE_LOGGING_MAXSIZE}
+    restart: ${BASE_RESTART_STRATEGY}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${BASE_DATA_DIR}/transmission:/config
+      - ${HOME_SCRIPT_STORAGE}:/storage
+

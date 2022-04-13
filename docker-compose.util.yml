@@ -1,5 +1,3 @@
-version: "3.7"
-
 services:
   
   portaineragent:
@@ -21,6 +19,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - /var/run/docker.sock:/var/run/docker.sock
       - /var/lib/docker/volumes:/var/lib/docker/volumes
+    network_mode: bridge
 
   portainer:
     image: portainer/portainer-ce
@@ -40,6 +39,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - /var/run/docker.sock:/var/run/docker.sock
       - ${BASE_DATA_DIR}/portainer:/data
+    network_mode: bridge
 
   watchtower:
     container_name: watchtower
@@ -56,3 +56,4 @@ services:
       - ${BASE_DATA_DIR}/watchtower/config.json:/config.json
       - /var/run/docker.sock:/var/run/docker.sock
     command: --cleanup --no-restart --http-api-metrics
+    network_mode: bridge

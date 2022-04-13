@@ -11,7 +11,7 @@ services:
   # https://docs.linuxserver.io/images/docker-jellyfin
   jellyfin:
     # image: lscr.io/linuxserver/jellyfin:nightly
-    image: nyanmisaka/jellyfin:nightly
+    image: nyanmisaka/jellyfin:latest
     container_name: jellyfin
     environment:
       - TZ=${TZ}

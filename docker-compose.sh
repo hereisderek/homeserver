@@ -4,7 +4,7 @@
 # ./docker-compose.sh -p derek -f docker-compose.util.yml up -d
 # ./docker-compose.sh -p derek -f docker-compose.media.yml up -d
 # ./docker-compose.sh -p derek -f docker-compose.player.yml up -d
-# ./docker-compose.sh -p derek -f docker-compose.util.yml up -d
+# ./docker-compose.sh -p derek -f docker-compose.downloader.yml up -d
 
 # set -x
 set -e
@@ -15,7 +15,7 @@ VERSION="0.1"
 ENV_FILE=".env"
 
 mkdir -p "./tmp"
-ENV_TEMP=$(mktemp ./tmp/${SELF_NAME}_XXXXXXXXX.env)
+# ENV_TEMP=$(mktemp ./tmp/${SELF_NAME}_XXXXXXXXX.env)
 
 
 # colors
@@ -44,7 +44,7 @@ OPTIND=1
 LOG_FILE=tmp/service.log
 LOG=true
 
-# DEBUG=false
+DEBUG=false
 DEBUG=${DEBUG:-false}
 
 
@@ -74,13 +74,24 @@ Usage: -p <profile> (-f <docker-compose.yml>) [docker command]
 
 E.g:
     ${SELF_NAME} -p derek up -d
+
+Note: 
+    1. <docker-compose>.override.yml will be loaded automatically
+    2. when -f is used with -p, specified docker-compose file (and its override) will also be looked under the <profile>
+
+    e.g. ${SELF_NAME} -p derek -f serivce1.yml config will include the following yml files (if exists)
+    * service1.yml
+    * service1.override.yml
+    * profile/derek/service1.yml
+    * profile/derek/service1.override.yml
+
 EOF
 }
 
 
 function err() {
-    # echo -e "${RED}${@}${COLOR_RESET}"
-    echo -e "Error ${@} "
+    echo -e "${RED}${@}${COLOR_RESET}"
+    # echo -e "Error ${@} "
 }
 
 function out() {
@@ -90,7 +101,7 @@ function out() {
 color()(set -o pipefail;"$@" 2>&1>&3|sed $'s,.*,\e[31m&\e[m,'>&2)3>&1
 
 function evaluate() {
-    echo "evaluating [$@] ..."
+    echo -e "evaluating [${GREEN}${@}${COLOR_RESET}]"
     # color eval $@  2>&1 | tee $LOG_FILE
     eval docker-compose $@  2>&1 | tee $LOG_FILE
 }
@@ -105,12 +116,11 @@ function mergeEnv() {
     done
 
     echo "merging into ${output} for env files: ${filtered_files}, original env_files:$env_files"
-    # sort -u -t '=' -k 1,1 $(echo "${@:2}"|tr ' ' '\n'|tac|tr '\n' ' ')>${output}
     sort -u -t '=' -k 1,1 $(echo "${filtered_files}"|tr ' ' '\n'|tac|tr '\n' ' ')>${output}
-    [[ $DEBUG -eq true ]] && {
-        printf "displaying merged env file: \n"
-        cat $ENV_TEMP
-    }
+    # [[ $DEBUG -eq true ]] && {
+    #     printf "displaying merged env file: \n"
+    #     cat $ENV_TEMP
+    # }
     
 }
 
@@ -119,13 +129,29 @@ function docker_yml_params() {
     [[ $DEBUG -eq true ]] && {
         printf "docker_yml_params merging files:$files \n"
     }
+
     local files_param=""
     for file in $files; do
-        [[ -f $file ]] && files_param+=" -f ${file} ";
-        # files_param+=" -f ${file} ";
+        local filename="${file%.*}"
+        local extension="${file##*.}"
+
+        local local_file=${file}
+        [[ -f $local_file ]] && files_param+=" -f ${local_file} ";
+        # override file
+
+        local_file="${filename}.override.${extension}"
+        [[ -f $local_file ]] && files_param+=" -f ${local_file} ";
+
+        # profile
+        local_file="${profile}/${file}"
+        [[ -f $local_file ]] && files_param+=" -f ${local_file} ";
+
+        # profile override
+        local_file="${profile}/${filename}.override.${extension}"
+        [[ -f $local_file ]] && files_param+=" -f ${local_file} ";
     done
     merged_compose_files_param=$files_param
-    echo "files_param: $files_param"
+    out "files_param: $files_param"
 }
 
 
@@ -150,6 +176,7 @@ shift $((OPTIND-1))
 
 remaining_command=$@
 
+ENV_TEMP=$(mktemp ./tmp/${SELF_NAME}_XXXXXXXXX.env)
 
 [[ $DEBUG -eq true ]] && {
     printf "DEBUG --- profile:[$profile] yaml_files:[$yaml_files] remaining_command:[${remaining_command}] \n"
@@ -174,10 +201,9 @@ unset merged_compose_files_param
 [[ ${#yaml_files[@]} -eq 0 ]] && {
     docker_yml_params "docker-compose.yml" "docker-compose.override.yml" "${profile}/docker-compose.yml" "${profile}/docker-compose.override.yml" 
 } || {
-    docker_yml_params ${yaml_files} "docker-compose.override.yml" "${profile}/docker-compose.yml" "${profile}/docker-compose.override.yml" "$yaml_files"
+    docker_yml_params ${yaml_files}
 }
 
-docker_yml_params "docker-compose.yml" "docker-compose.override.yml" "${profile}/docker-compose.yml" "${profile}/docker-compose.override.yml" "$yaml_files"
 echo "merged_compose_files_param:$merged_compose_files_param"
 ymal_files_param="${merged_compose_files_param}"
 

@@ -8,39 +8,39 @@ networks:
 services:
   
   #https://github.com/SuperNG6/docker-aria2
-  docker-aria2:
-    container_name: docker-aria2
-    image: superng6/aria2:webui-latest
-    ports:
-      - ${DOCKER_ARAI2_RPC_6800}:6800
-      - ${DOCKER_ARAI2_P2P_6881}:6801
-      - ${DOCKER_ARAI2_P2P_6881_UDP}:6801/udp
-      - ${DOCKER_ARAI2_WEB_8080}:8080
-      - ${DOCKER_ARAI2_BT_32516}:32516
-    environment:
-      - PGID=${PGID}
-      - PUID=${PUID}
-      - TZ=${TZ}
-      - SECRET=${DOCKER_ARAI2_SECRET}
-      - CACHE=1024M
-      - WEBUI=true
-      - WEBUI_PORT=8080
-      - BTPORT=32516
-      - UT=true
-      - RUT=true
-      - CTU="https://cdn.jsdelivr.net/gh/XIU2/TrackersListCollection@master/best_aria2.txt"
-      - SMD=true
-      - FA=none
-    logging:
-      driver: json-file
-      options:
-        max-file: ${BASE_LOGGING_MAXFILE}
-        max-size: ${BASE_LOGGING_MAXSIZE}
-    restart: ${BASE_RESTART_STRATEGY}
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${BASE_DATA_DIR}/docker-aria2:/config
-      - ${MEDIA_LIB_DIR}:/storage
+  # docker-aria2:
+  #   container_name: docker-aria2
+  #   image: superng6/aria2:webui-latest
+  #   ports:
+  #     - ${DOCKER_ARAI2_RPC_6800}:6800
+  #     - ${DOCKER_ARAI2_P2P_6881}:6801
+  #     - ${DOCKER_ARAI2_P2P_6881_UDP}:6801/udp
+  #     - ${DOCKER_ARAI2_WEB_8080}:8080
+  #     - ${DOCKER_ARAI2_BT_32516}:32516
+  #   environment:
+  #     - PGID=${PGID}
+  #     - PUID=${PUID}
+  #     - TZ=${TZ}
+  #     - SECRET=${DOCKER_ARAI2_SECRET}
+  #     - CACHE=1024M
+  #     - WEBUI=true
+  #     - WEBUI_PORT=8080
+  #     - BTPORT=32516
+  #     - UT=true
+  #     - RUT=true
+  #     - CTU="https://cdn.jsdelivr.net/gh/XIU2/TrackersListCollection@master/best_aria2.txt"
+  #     - SMD=true
+  #     - FA=none
+  #   logging:
+  #     driver: json-file
+  #     options:
+  #       max-file: ${BASE_LOGGING_MAXFILE}
+  #       max-size: ${BASE_LOGGING_MAXSIZE}
+  #   restart: ${BASE_RESTART_STRATEGY}
+  #   volumes:
+  #     - /etc/localtime:/etc/localtime:ro
+  #     - ${BASE_DATA_DIR}/docker-aria2:/config
+  #     - ${MEDIA_LIB_DIR}:/storage
 
   qbittorrent:
     container_name: qbittorrent
@@ -64,47 +64,47 @@ services:
       - ${BASE_DATA_DIR}/qbittorrent:/config
       - ${MEDIA_LIB_DIR}:/storage
 
-  nzbget:
-    image: lscr.io/linuxserver/nzbget
-    ports:
-      - ${NZBGET_PORT_6789:-6789}:6789
-    container_name: nzbget
-    environment:
-      - PGID=${PGID}
-      - PUID=${PUID}
-      - TZ=${TZ}
-    logging:
-      driver: json-file
-      options:
-        max-file: ${BASE_LOGGING_MAXFILE}
-        max-size: ${BASE_LOGGING_MAXSIZE}
-    restart: ${BASE_RESTART_STRATEGY}
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${BASE_DATA_DIR}/nzbget:/config
-      - ${MEDIA_LIB_DIR}:/storage
+  # nzbget:
+  #   image: lscr.io/linuxserver/nzbget
+  #   ports:
+  #     - ${NZBGET_PORT_6789:-6789}:6789
+  #   container_name: nzbget
+  #   environment:
+  #     - PGID=${PGID}
+  #     - PUID=${PUID}
+  #     - TZ=${TZ}
+  #   logging:
+  #     driver: json-file
+  #     options:
+  #       max-file: ${BASE_LOGGING_MAXFILE}
+  #       max-size: ${BASE_LOGGING_MAXSIZE}
+  #   restart: ${BASE_RESTART_STRATEGY}
+  #   volumes:
+  #     - /etc/localtime:/etc/localtime:ro
+  #     - ${BASE_DATA_DIR}/nzbget:/config
+  #     - ${MEDIA_LIB_DIR}:/storage
 
-  transmission:
-    image: lscr.io/linuxserver/transmission
-    ports:
-      - ${TRANSMISSION_PORT_51413}:51413
-      - ${TRANSMISSION_PORT_51413}:51413/udp
-      - ${TRANSMISSION_PORT_6881}:6881
-      - ${TRANSMISSION_PORT_6881}:6881/udp
-      - ${TRANSMISSION_PORT_9091}:9091
-    container_name: transmission
-    environment:
-      - PGID=${PGID}
-      - PUID=${PUID}
-      - TZ=${TZ}
-    logging:
-      driver: json-file
-      options:
-        max-file: ${BASE_LOGGING_MAXFILE}
-        max-size: ${BASE_LOGGING_MAXSIZE}
-    restart: ${BASE_RESTART_STRATEGY}
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${BASE_DATA_DIR}/transmission:/config
-      - ${MEDIA_LIB_DIR}:/storage
+  # transmission:
+  #   image: lscr.io/linuxserver/transmission
+  #   ports:
+  #     - ${TRANSMISSION_PORT_51413}:51413
+  #     - ${TRANSMISSION_PORT_51413}:51413/udp
+  #     - ${TRANSMISSION_PORT_6881}:6881
+  #     - ${TRANSMISSION_PORT_6881}:6881/udp
+  #     - ${TRANSMISSION_PORT_9091}:9091
+  #   container_name: transmission
+  #   environment:
+  #     - PGID=${PGID}
+  #     - PUID=${PUID}
+  #     - TZ=${TZ}
+  #   logging:
+  #     driver: json-file
+  #     options:
+  #       max-file: ${BASE_LOGGING_MAXFILE}
+  #       max-size: ${BASE_LOGGING_MAXSIZE}
+  #   restart: ${BASE_RESTART_STRATEGY}
+  #   volumes:
+  #     - /etc/localtime:/etc/localtime:ro
+  #     - ${BASE_DATA_DIR}/transmission:/config
+  #     - ${MEDIA_LIB_DIR}:/storage
 

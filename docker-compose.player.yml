@@ -7,78 +7,43 @@ networks:
 
 services:
 
+
+  # https://docs.linuxserver.io/images/docker-jellyfin
   jellyfin:
     # image: lscr.io/linuxserver/jellyfin:nightly
-    image: nyanmisaka/jellyfin:latest
+    image: nyanmisaka/jellyfin:nightly
     container_name: jellyfin
-    runtime: nvidia
-    # privileged: true
     environment:
       - TZ=${TZ}
       - PUID=${PUID}
       - PGID=${PGID}
-      - NVIDIA_DRIVER_CAPABILITIES=all
-      - NVIDIA_VISIBLE_DEVICES=all
-      - JELLYFIN_PublishedServerUrl=192.168.50.10 #optional
+      - JELLYFIN_PublishedServerUrl='' #optional
     volumes:
       - ${BASE_DATA_DIR}/jellyfin:/config
-      - ${BASE_CACHE_DIR}/jellyfin/cache:/config/cache
       - ${BASE_CACHE_DIR}/jellyfin/cache:/cache
-      - ${BASE_CACHE_DIR}/jellyfin/metadata:/config/data/metadata
-      - ${BASE_CACHE_DIR}/jellyfin/transcodes:/config/data/transcodes
+      - ${BASE_CACHE_DIR}/jellyfin/metadata:/config/metadata
+      - ${BASE_CACHE_DIR}/jellyfin/transcodes:/config/transcodes
       - ${MEDIA_LIB_DIR}:/storage
     restart: ${BASE_RESTART_STRATEGY}  
-    # https://docs.linuxserver.io/images/docker-jellyfin
     ports:
       - ${JELLYFIN_WEB_8096}:8096
       # - 8920:8920 #optional https
       - ${JELLYFIN_PORT_7359}:7359/udp #optional clients discovery
       - ${JELLYFIN_PORT_1900}:1900/udp #optional DNLA
-    devices:
-      - /dev/dri:/dev/dri
-      - /dev/nvidia0:/dev/nvidia0
-      - /dev/nvidia1:/dev/nvidia1
-      - /dev/nvidia2:/dev/nvidia2
-      - /dev/nvidiactl:/dev/nvidiactl
-      - /dev/nvidia-uvm:/dev/nvidia-uvm
-      - /dev/nvidia-uvm-tools:/dev/nvidia-uvm-tools
-    deploy:
-      resources:
-        reservations:
-          devices:
-          - capabilities: [gpu]
 
 
   plex:
     image: lscr.io/linuxserver/plex:latest
     container_name: plex
-    # network_mode: host
-    # runtime: nvidia
-    # privileged: true
     environment:
       - TZ=${TZ}
       - PUID=${PUID}
       - PGID=${PGID}
       - VERSION=docker
       - PLEX_CLAIM=${PLEX_CLAIM}
-      - NVIDIA_DRIVER_CAPABILITIES=all
-      - NVIDIA_VISIBLE_DEVICES=all
     volumes:
       - ${BASE_DATA_DIR}/plex:/config
       - ${MEDIA_LIB_DIR}:/storage
     restart: ${BASE_RESTART_STRATEGY}  
     ports:
       - ${PLEX_WEB_32400}:32400
-    devices:
-      - /dev/dri:/dev/dri
-      - /dev/nvidia0:/dev/nvidia0
-      - /dev/nvidia1:/dev/nvidia1
-      - /dev/nvidia2:/dev/nvidia2
-      - /dev/nvidiactl:/dev/nvidiactl
-      - /dev/nvidia-uvm:/dev/nvidia-uvm
-      - /dev/nvidia-uvm-tools:/dev/nvidia-uvm-tools
-    deploy:
-      resources:
-        reservations:
-          devices:
-          - capabilities: [gpu]

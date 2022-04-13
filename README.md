@@ -43,6 +43,10 @@ Utilize Docker to create automation tasks for home media server. this is heavily
   - Wireguard
 - Cabby
 
+### Players:
+To run without nvidia driver (with profile):
+
+`./docker-compose.sh -p profile -f docker-compose.player.yml  config`
 
 ## Environment
 I personally am running all this setup on my mining rig with a super low end celeron process with 8GB of ram, running ubuntu bionic 64bit. 

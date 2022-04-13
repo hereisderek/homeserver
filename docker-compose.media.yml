@@ -110,6 +110,27 @@ services:
       - ${BASE_DATA_DIR}/lidarr:/config
       - ${MEDIA_LIB_DIR}:/storage
 
+  whisparr:
+    # image: hotio/readarr:nightly
+    image: cr.hotio.dev/hotio/whisparr:nightly
+    container_name: whisparr
+    ports:
+      - ${WHISPARR_PORT_6969}:6969
+    environment:
+      - PGID=${PGID}
+      - PUID=${PUID}
+      - TZ=${TZ}
+    logging:
+      driver: json-file
+      options:
+        max-file: ${BASE_LOGGING_MAXFILE}
+        max-size: ${BASE_LOGGING_MAXSIZE}
+    restart: ${BASE_RESTART_STRATEGY}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${BASE_DATA_DIR}/whisparr:/config
+      - ${MEDIA_LIB_DIR}:/storage
+
 
   calibre:
     image: lscr.io/linuxserver/calibre

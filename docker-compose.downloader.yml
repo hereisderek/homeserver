@@ -31,7 +31,7 @@ services:
       - BTPORT=32516
       - UT=true
       - RUT=true
-      - CTU="https://cdn.jsdelivr.net/gh/XIU2/TrackersListCollection@master/best_aria2.txt"
+      - CTU=https://cdn.jsdelivr.net/gh/XIU2/TrackersListCollection@master/best_aria2.txt
       - SMD=true
       - FA=none
     logging:
@@ -110,4 +110,5 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - ${BASE_DATA_DIR}/transmission:/config
       - ${MEDIA_LIB_DIR}:/storage
+      - ${MEDIA_LIB_DIR}:/downloads
 

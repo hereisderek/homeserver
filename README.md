@@ -84,6 +84,8 @@ Configurations are mostly stored in the `.env`, they are all prefixed by `BASE_`
   * http://radarr:7878
 
 ## downloader
+**Important:** Remember to double check the download/incomplete location for the downloaders or you could flood your hard drive/docker volumes real quick
+
 `mkdir -p {qbittorrent,transmission,nzbget,aria2}/{watch,torrents,torrents_done,{sonarr,radarr,lidarr,readarr,others}/{complete,incomplete}}`
 
 ```

@@ -54,7 +54,5 @@ services:
     volumes:
       - ${BASE_DATA_DIR}/watchtower/config.json:/config.json
       - /var/run/docker.sock:/var/run/docker.sock
-    command: --cleanup --http-api-metrics
+    command: --cleanup
     network_mode: bridge
-    ports:
-      - ${WATCHTOWER_WEB_8080}:8080

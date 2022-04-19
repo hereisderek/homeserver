@@ -51,9 +51,10 @@ services:
       - WATCHTOWER_HTTP_API=true
       - WATCHTOWER_HTTP_API_TOKEN=watchtower
       - WATCHTOWER_ROLLING_RESTART=true
-        #- WATCHTOWER_NO_RESTART=true
     volumes:
       - ${BASE_DATA_DIR}/watchtower/config.json:/config.json
       - /var/run/docker.sock:/var/run/docker.sock
-    command: --cleanup --no-restart --http-api-metrics
+    command: --cleanup --http-api-metrics
     network_mode: bridge
+    ports:
+      - ${WATCHTOWER_WEB_8080}:8080

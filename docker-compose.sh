@@ -62,9 +62,6 @@ DEBUG=${DEBUG:-false}
 }
 
 
-[[ $DEBUG -eq true ]] && printf "created env file:$ENV_TEMP\n"
-
-
 ## beginning of the actual script
 
 
@@ -78,15 +75,18 @@ E.g:
     ${SELF_NAME} -p derek up -d
 
 Note: 
-    1. <docker-compose>.override.yml will be loaded automatically
-    2. when -f is used with -p, specified docker-compose file (and its override) will also be looked under the <profile>
-    3. if -f is omitted, it will apply all the yml files
+    * <docker-compose>.override.yml will be loaded automatically
+    * when -f is used with -p, specified docker-compose file (and its override) will also be looked under the <profile>
+    * if -f is omitted, it will apply all the yml files
+    * when command is omitted, it will run "up -d"
+    * does ${UNDERLINE}NOT${COLOR_RESET} support wildcard filename such as "docker-compose.*.yml"
 
+    
     e.g. ${SELF_NAME} -p derek -f serivce1.yml config will include the following yml files (if exists)
-    * service1.yml
-    * service1.override.yml
-    * profile/derek/service1.yml
-    * profile/derek/service1.override.yml
+        service1.yml
+        service1.override.yml
+        profile/derek/service1.yml
+        profile/derek/service1.override.yml
 
 EOF
 }
@@ -158,10 +158,13 @@ profile="default_profile"
 yaml_files=
 exclude_yaml_files=
 remaining_command=
+default_command=
 
-while getopts ":h?p:f:x:" option
+while getopts ":h?p:f:x:d" option
 do 
     case "${option}" in
+        d)
+            default_command="up -d";;
         p)
             profile="profiles/${OPTARG}" ;;
         f)  
@@ -178,14 +181,12 @@ shift $((OPTIND-1))
 
 remaining_command=$@
 
-ENV_TEMP=$(mktemp ./tmp/${SELF_NAME}_XXXXXXXXX.env)
-
 [[ $DEBUG -eq true ]] && {
-    printf "DEBUG --- profile:[$profile] yaml_files:[$yaml_files] exclude_yaml_files:[${exclude_yaml_files}] remaining_command:[${remaining_command}] \n"
+    printf "DEBUG --- profile:[$profile] yaml_files:[$yaml_files] exclude_yaml_files:[${exclude_yaml_files}] remaining_command:[${remaining_command}] default_command:[${default_command}]\n"
 }
 
 
-[[ -z $remaining_command ]]&& {
+([[ -z $remaining_command ]]&&[[ -z $default_command ]])&& {
     err "no command supplied"
     exit 1;
 }
@@ -195,6 +196,8 @@ out "Using profile:$profile ..."
 [[ -d ${profile} ]] || {
     err "unable to find profile dir:${profile}, exiting ..."; exit 2;
 }
+
+ENV_TEMP=$(mktemp ./tmp/${SELF_NAME}_XXXXXXXXX.env)&&[[ $DEBUG -eq true ]]&&printf "created env file:$ENV_TEMP\n"
 
 mergeEnv ${ENV_TEMP} "$ENV_FILE" "${profile}/${ENV_FILE}"
 
@@ -207,6 +210,6 @@ ymal_files_param="${merged_compose_files_param}"
 
 echo "ymal_files_param:${ymal_files_param}"
 
-evaluate "docker-compose ${ymal_files_param} --env-file ${ENV_TEMP} $remaining_command"
+evaluate "docker-compose ${ymal_files_param} --env-file ${ENV_TEMP} $remaining_command $default_command"
 
 rm ${ENV_TEMP}

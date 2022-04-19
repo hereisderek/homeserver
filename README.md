@@ -48,6 +48,15 @@ To run without nvidia driver (with profile):
 
 `./docker-compose.sh -p profile -f docker-compose.player.yml  config`
 
+Optional: local caching mount"
+```
+${BASE_CACHE_DIR}/radarr/MediaCover:radarr/MediaCover
+${BASE_CACHE_DIR}/sonarr/MediaCover:sonarr/MediaCover
+${BASE_CACHE_DIR}/lidarr/MediaCover:lidarr/MediaCover
+${BASE_CACHE_DIR}/plex/Library:plex/Library
+${BASE_CACHE_DIR}/jellyfin/matadata:jellyfin/matadata
+```
+
 ## Environment
 I personally am running all this setup on my mining rig with a super low end celeron process with 8GB of ram, running ubuntu bionic 64bit. 
 

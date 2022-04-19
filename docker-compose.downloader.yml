@@ -1,13 +1,3 @@
-# version: "3.7"
-
-# networks:
-#   default:
-#     name: home_service
-#     enable_ipv6: true
-#     driver_opts:
-#       com.docker.network.enable_ipv6: "true"
-#     driver: bridge
-
 services:
   
   #https://github.com/SuperNG6/docker-aria2
@@ -76,6 +66,9 @@ services:
       - PGID=${PGID}
       - PUID=${PUID}
       - TZ=${TZ}
+      - NZBGET_USER=${NZBGET_USER:-admin}
+      - NZBGET_PASS=${NZBGET_PASS:-admin}
+
     logging:
       driver: json-file
       options:

@@ -1,13 +1,4 @@
-# version: "3.7"
-
-# networks:
-#   default:
-#     name: home_service
-#     driver: bridge
-
 services:
-
-
   # https://docs.linuxserver.io/images/docker-jellyfin
   jellyfin:
     # image: lscr.io/linuxserver/jellyfin:nightly
@@ -44,6 +35,7 @@ services:
     volumes:
       - ${BASE_DATA_DIR}/plex:/config
       - ${MEDIA_LIB_DIR}:/storage
+      - ${BASE_CACHE_DIR}/plex/transcodes:/cache/transcodes
     restart: ${BASE_RESTART_STRATEGY}  
     ports:
       - ${PLEX_WEB_32400}:32400

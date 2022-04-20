@@ -54,7 +54,7 @@ ${BASE_CACHE_DIR}/radarr/MediaCover:radarr/MediaCover
 ${BASE_CACHE_DIR}/sonarr/MediaCover:sonarr/MediaCover
 ${BASE_CACHE_DIR}/lidarr/MediaCover:lidarr/MediaCover
 ${BASE_CACHE_DIR}/plex/Library:plex/Library
-${BASE_CACHE_DIR}/jellyfin/matadata:jellyfin/matadata
+${BASE_CACHE_DIR}/jellyfin/metadata:jellyfin/metadata
 ```
 
 ## Environment

@@ -56,3 +56,35 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     command: --cleanup
     network_mode: bridge
+
+  duplicacy:
+    container_name: duplicacy
+    image: cr.hotio.dev/hotio/duplicacy
+    environment:
+      - PGID=${PGID}
+      - PUID=${PUID}
+      - TZ=${TZ}
+      - UMASK=${UMASK}
+      - WATCHTOWER_HTTP_API_TOKEN=watchtower
+      - WATCHTOWER_ROLLING_RESTART=true
+    volumes:
+      - ${BASE_DATA_DIR}/duplicacy:/config
+      - ${BASE_CACHE_DIR}/duplicacy:/cache
+      - ${BASE_CACHE_DIR}/duplicacy/logs:/logs
+      - ${BASE_DATA_DIR}/:/backups/config
+    network_mode: bridge
+    profiles: ["backup"]
+
+  hdidle:
+    container_name: hdidle
+    image: cr.hotio.dev/hotio/hdidle
+    privileged: true
+    environment:
+      - PGID=${PGID}
+      - PUID=${PUID}
+      - TZ=${TZ}
+      - UMASK=${UMASK}
+      - ARGS=-d -i 1800
+    volumes:
+      - ${BASE_DATA_DIR}/hdidle:/config
+    profiles: ["disabled"]

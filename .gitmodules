@@ -1,0 +1,8 @@
+[submodule "profiles/derek"]
+	path = profiles/derek
+	url = git@github.com:hereisderek/homeserver_profile.git
+	branch = derek
+[submodule "profiles/worker001"]
+	path = profiles/worker001
+	url = git@github.com:hereisderek/homeserver_profile.git
+	branch = worker001

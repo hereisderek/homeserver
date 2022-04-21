@@ -1,0 +1,17 @@
+version: "3.7"
+
+networks:
+  default:
+    name: home_service
+    # enable_ipv6: true
+    # driver_opts:
+    #   com.docker.network.enable_ipv6: "true"
+    driver: bridge
+
+# services:
+
+#   test_ipv6:
+#     image: busybox
+#     command: ping6 -c 4 google.com
+#     networks:
+#       - default

@@ -1,0 +1,90 @@
+services:
+  
+  portaineragent:
+    image: portainer/agent
+    ports:
+      - ${PORTAINERAGENT_PORT_9001}:9001
+    container_name: portaineragent
+    environment:
+      - CAP_HOST_MANAGEMENT=1
+      - TZ=${TZ}
+    logging:
+      driver: json-file
+      options:
+        max-file: ${BASE_LOGGING_MAXFILE}
+        max-size: ${BASE_LOGGING_MAXSIZE}
+    restart: ${BASE_RESTART_STRATEGY}
+    volumes:
+      - /:/host
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/lib/docker/volumes:/var/lib/docker/volumes
+    network_mode: bridge
+
+  portainer:
+    image: portainer/portainer-ce
+    ports:
+      - ${PORTAINER_PORT_9000}:9000
+    command: -H unix:///var/run/docker.sock
+    container_name: portainer
+    environment:
+      - TZ=${TZ}
+    logging:
+      driver: json-file
+      options:
+        max-file: ${BASE_LOGGING_MAXFILE}
+        max-size: ${BASE_LOGGING_MAXSIZE}
+    restart: ${BASE_RESTART_STRATEGY}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${BASE_DATA_DIR}/portainer:/data
+    network_mode: bridge
+
+  watchtower:
+    container_name: watchtower
+    image: containrrr/watchtower 
+    environment:
+      - PGID=${PGID}
+      - PUID=${PUID}
+      - TZ=${TZ}
+      - WATCHTOWER_HTTP_API=true
+      - WATCHTOWER_HTTP_API_TOKEN=watchtower
+      - WATCHTOWER_ROLLING_RESTART=true
+    volumes:
+      - ${BASE_DATA_DIR}/watchtower/config.json:/config.json
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --cleanup
+    network_mode: bridge
+
+  duplicacy:
+    container_name: duplicacy
+    image: cr.hotio.dev/hotio/duplicacy
+    environment:
+      - PGID=${PGID}
+      - PUID=${PUID}
+      - TZ=${TZ}
+      - UMASK=${UMASK}
+      - WATCHTOWER_HTTP_API_TOKEN=watchtower
+      - WATCHTOWER_ROLLING_RESTART=true
+    volumes:
+      - ${BASE_DATA_DIR}/duplicacy:/config
+      - ${BASE_CACHE_DIR}/duplicacy:/cache
+      - ${BASE_CACHE_DIR}/duplicacy/logs:/logs
+      - ${BASE_DATA_DIR}/:/backups/config
+    network_mode: bridge
+    profiles: ["backup"]
+
+  hdidle:
+    container_name: hdidle
+    image: cr.hotio.dev/hotio/hdidle
+    privileged: true
+    environment:
+      - PGID=${PGID}
+      - PUID=${PUID}
+      - TZ=${TZ}
+      - UMASK=${UMASK}
+      - ARGS=-d -i 1800
+    volumes:
+      - ${BASE_DATA_DIR}/hdidle:/config
+    profiles: ["disabled"]

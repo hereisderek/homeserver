@@ -43,6 +43,19 @@ Utilize Docker to create automation tasks for home media server. this is heavily
   - Wireguard
 - Cabby
 
+### Players:
+To run without nvidia driver (with profile):
+
+`./docker-compose.sh -p profile -f docker-compose.player.yml  config`
+
+Optional: local caching mount"
+```
+${BASE_CACHE_DIR}/radarr/MediaCover:radarr/MediaCover
+${BASE_CACHE_DIR}/sonarr/MediaCover:sonarr/MediaCover
+${BASE_CACHE_DIR}/lidarr/MediaCover:lidarr/MediaCover
+${BASE_CACHE_DIR}/plex/Library:plex/Library
+${BASE_CACHE_DIR}/jellyfin/metadata:jellyfin/metadata
+```
 
 ## Environment
 I personally am running all this setup on my mining rig with a super low end celeron process with 8GB of ram, running ubuntu bionic 64bit. 
@@ -71,6 +84,103 @@ Configurations are mostly stored in the `.env`, they are all prefixed by `BASE_`
 * Nvidia docker cgroup issue. [see this](https://github.com/NVIDIA/nvidia-docker/issues/1447#issuecomment-757034464)
 
 
+## Default ports
+  * http://prowlarr:9696
+  * http://readarr:8686
+  * http://bazarr:6767
+  * http://lidarr:8686
+  * http://sonarr:8989
+  * http://radarr:7878
+
+## downloader
+**Important:** Remember to double check the download/incomplete location for the downloaders or you could flood your hard drive/docker volumes real quick
+
+`mkdir -p {qbittorrent,transmission,nzbget,aria2}/{watch,torrents,torrents_done,{sonarr,radarr,lidarr,readarr,others}/{complete,incomplete}}`
+
+```
+.
+├── aria2
+│   ├── lidarr
+│   │   ├── complete
+│   │   └── incomplete
+│   ├── others
+│   │   ├── complete
+│   │   └── incomplete
+│   ├── radarr
+│   │   ├── complete
+│   │   └── incomplete
+│   ├── readarr
+│   │   ├── complete
+│   │   └── incomplete
+│   ├── sonarr
+│   │   ├── complete
+│   │   └── incomplete
+│   ├── torrents
+│   ├── torrents_done
+│   └── watch
+├── nzbget
+│   ├── lidarr
+│   │   ├── complete
+│   │   └── incomplete
+│   ├── others
+│   │   ├── complete
+│   │   └── incomplete
+│   ├── radarr
+│   │   ├── complete
+│   │   └── incomplete
+│   ├── readarr
+│   │   ├── complete
+│   │   └── incomplete
+│   ├── sonarr
+│   │   ├── complete
+│   │   └── incomplete
+│   ├── torrents
+│   ├── torrents_done
+│   └── watch
+├── qbittorrent
+│   ├── lidarr
+│   │   ├── complete
+│   │   └── incomplete
+│   ├── others
+│   │   ├── complete
+│   │   └── incomplete
+│   ├── radarr
+│   │   ├── complete
+│   │   └── incomplete
+│   ├── readarr
+│   │   ├── complete
+│   │   └── incomplete
+│   ├── sonarr
+│   │   ├── complete
+│   │   └── incomplete
+│   ├── torrents
+│   ├── torrents_done
+│   └── watch
+└── transmission
+    ├── lidarr
+    │   ├── complete
+    │   └── incomplete
+    ├── others
+    │   ├── complete
+    │   └── incomplete
+    ├── radarr
+    │   ├── complete
+    │   └── incomplete
+    ├── readarr
+    │   ├── complete
+    │   └── incomplete
+    ├── sonarr
+    │   ├── complete
+    │   └── incomplete
+    ├── torrents
+    ├── torrents_done
+    └── watch
+```
+
+
+## Other services 
+ * [aria2-ariang-docker](https://github.com/wahyd4/aria2-ariang-docker) Aria2 + AriaNg + Filebrowser
+ * [SuperNG6/docker-aria2](https://github.com/SuperNG6/docker-aria2) Docker Aria2的最佳实践
 
 ## Useful links
 

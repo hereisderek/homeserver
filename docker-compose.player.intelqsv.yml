@@ -1,0 +1,14 @@
+services:
+  # plex:
+  #   volumes:
+  #     - ${BASE_CACHE_DIR}/plex/Library:/config/Library
+  jellyfin:
+    privileged: true
+
+    devices:
+      - /dev/dri:/dev/dri
+      - /dev/dri/renderD128:/dev/dri/renderD128
+
+    
+
+

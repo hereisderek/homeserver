@@ -24,7 +24,7 @@ Utilize Docker to create automation tasks for home media server. this is heavily
   - [FlareSolverr](https://github.com/FlareSolverr/FlareSolverr): Bypass Cloudflare protection in Jackett. This runs a firefox in headless mode, and turns out to be too much for my cpu to handle *Optional*
 - media server
   - Jellyfin
-  - *Plex*
+  - Plex
   - *Emby*
 - other downloaders
   - Calibre
@@ -35,13 +35,21 @@ Utilize Docker to create automation tasks for home media server. this is heavily
   - ddclient
   - file management, such as File Browser, h5ai, nextcloud etc.
   - Duplicati
-  - 
+  - trex-miner
 
 
 ### To be added
 - Proxy/VPN
   - Wireguard
 - Cabby
+
+
+**docker-compose?**
+
+```
+sudo sh -c "curl -L --fail https://raw.githubusercontent.com/linuxserver/docker-docker-compose/master/run.sh -o /usr/local/bin/docker-compose && chmod +x /usr/local/bin/docker-compose"
+```
+And ofcouse you should audit the code before running it. Just like every other thing you download from the internet
 
 ### Players:
 To run without nvidia driver (with profile):

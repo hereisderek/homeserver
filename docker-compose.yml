@@ -9,9 +9,23 @@ networks:
     driver: bridge
 
 # services:
-
-#   test_ipv6:
-#     image: busybox
-#     command: ping6 -c 4 google.com
+#   template:
+#     image: alpine
+#     container_name: template
+#     environment:
+#       - PGID=${PGID}
+#       - PUID=${PUID}
+#       - TZ=${TZ}
+#     logging:
+#       driver: json-file
+#       options:
+#         max-file: ${BASE_LOGGING_MAXFILE}
+#         max-size: ${BASE_LOGGING_MAXSIZE}
+#     restart: ${BASE_RESTART_STRATEGY}
 #     networks:
 #       - default
+#     healthcheck:
+#       test: curl --fail -s http://localhost:5000/ || exit 1
+#       interval: 1m30s
+#       timeout: 10s
+#       retries: 3

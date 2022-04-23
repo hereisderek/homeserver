@@ -69,7 +69,11 @@ DEBUG=${DEBUG:-false}
 function help() {
     cat << EOF
 VERSION:${VERSION}
-Usage: -p <profile> (-f <docker-compose.yml>) [docker command]
+Usage: -p <profile> (-f <docker-compose.yml>)  (-x <docker-compose.yml>) [docker command]
+    -p specify profile name, should exist under profile folder
+    -d use default command, which is "up -d". Note: might cause problem when extra command also supplied
+    -f include yaml file
+    -x exclude yaml file
 
 E.g:
     ${SELF_NAME} -p derek up -d

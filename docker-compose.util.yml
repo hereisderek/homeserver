@@ -88,3 +88,42 @@ services:
     volumes:
       - ${BASE_DATA_DIR}/hdidle:/config
     profiles: ["disabled"]
+
+  trex-miner:
+    container_name: trex-miner
+    image: hereisderek/nv-docker-trex:nightly
+    runtime: nvidia
+    ports:
+      - ${TREX_MINER_WEB_4067:-4067}:4067/tcp
+    logging:
+      driver: json-file
+      options:
+        max-file: ${BASE_LOGGING_MAXFILE}
+        max-size: ${BASE_LOGGING_MAXSIZE}
+    restart: ${BASE_RESTART_STRATEGY}
+    environment:
+      - NVIDIA_DRIVER_CAPABILITIES=all
+      - NVIDIA_VISIBLE_DEVICES=all
+      - PGID=${PGID}
+      - PUID=${PUID}
+      - TZ=${TZ}
+      - UMASK=${UMASK}
+      - API_PASSWORD=${TREX_MINER_API_PWD:-Password1}
+      - WALLET=${TREX_MINER_WALLET}
+      - SERVER=${TREX_MINER_SERVER}
+    devices:
+      - /dev/dri:/dev/dri
+      - /dev/nvidia0:/dev/nvidia0
+      - /dev/nvidia1:/dev/nvidia1
+      - /dev/nvidia2:/dev/nvidia2
+      - /dev/nvidiactl:/dev/nvidiactl
+      - /dev/nvidia-uvm:/dev/nvidia-uvm
+      - /dev/nvidia-uvm-tools:/dev/nvidia-uvm-tools
+    deploy:
+      resources:
+        reservations:
+          devices:
+          - capabilities: [gpu]
+    volumes:
+      - ${BASE_DATA_DIR}/trex-miner:/config
+    profiles: ["disabled"]

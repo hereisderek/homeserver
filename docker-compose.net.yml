@@ -1,0 +1,24 @@
+services:
+  
+  squid:
+    # image: ubuntu/squid:latest
+    image: docker.io/salrashid123/squidproxy
+    ports:
+      - ${SQUID_PORT_3128}:3128
+    container_name: squid
+    environment:
+      - TZ=${TZ}
+    logging:
+      driver: json-file
+      options:
+        max-file: ${BASE_LOGGING_MAXFILE}
+        max-size: ${BASE_LOGGING_MAXSIZE}
+    restart: ${BASE_RESTART_STRATEGY}
+    command: /apps/squid/sbin/squid -NsY -f /apps/squid.conf.forward
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      # - ${BASE_DATA_DIR}/squid:/etc/squid
+      # - ${BASE_CACHE_DIR}/squid:/var/spool/squid
+      # - ${BASE_CACHE_DIR}/squid/logs:/var/log/squid
+    network_mode: bridge
+# docker pull ubuntu/squid

@@ -190,3 +190,37 @@ Configurations are mostly stored in the `.env`, they are all prefixed by `BASE_`
 - [wiki.servarr](https://wiki.servarr.com/docker-guide) General guid on *aar, very useful
 - [Setup Guide: Multi GPU Ubuntu Server AMD & nvidia](https://foldingforum.org/viewtopic.php?f=106&t=33090) (never tried myself, not looks promissing so have a read)
 - [Ubuntu with multiple GPU for mining](https://gist.github.com/ernestp/83bfd1667b1f5c3905b5c15dc9031811) (I didn't actually see this until now, might give stock ubuntu another go. )
+
+
+
+## FAQ
+  1. unable to scrub movie/show information?
+
+  It's possible that the dns has been polluted, go on to [this site](https://dnschecker.org/#AAAA/api.themoviedb.org) go get the right IPs for the calling api and paste it in your local hosts file (usually /etc/hosts), and mount into the container. 
+  For example, saving the following into your hosts file (might require root permission)
+
+  ```
+  13.227.219.32									api.themoviedb.org
+  13.227.219.43									api.themoviedb.org
+  13.227.219.97									api.themoviedb.org
+  13.227.219.100									api.themoviedb.org
+  2600:9000:21c7:2000:c:174a:c400:93a1			api.themoviedb.org
+  2600:9000:21c7:4e00:c:174a:c400:93a1			api.themoviedb.org
+  2600:9000:21c7:c00:c:174a:c400:93a1				api.themoviedb.org
+  2600:9000:21c7:3600:c:174a:c400:93a1			api.themoviedb.org
+  2600:9000:21c7:a000:c:174a:c400:93a1			api.themoviedb.org
+  2600:9000:21c7:fe00:c:174a:c400:93a1			api.themoviedb.org
+  2600:9000:21c7:3e00:c:174a:c400:93a1			api.themoviedb.org
+  2600:9000:21c7:0:c:174a:c400:93a1				api.themoviedb.org
+  ```
+
+  and then in the yml file:
+
+  ```
+    overseerr:
+    image: cr.hotio.dev/hotio/overseerr
+    # unrelavent lines are omitted..
+    volumes:
+      - /etc/hosts:/etc/hosts:ro # <- add this
+  ```
+  

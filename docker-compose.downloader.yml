@@ -105,3 +105,19 @@ services:
       - ${MEDIA_LIB_DIR}:/storage
       - ${MEDIA_LIB_DIR}:/downloads
 
+  metube:
+    image: alexta69/metube
+    container_name: metube
+    restart: unless-stopped
+    user: "${PUID}:${PGID}"
+    environment:
+      - PGID=${PGID}
+      - PUID=${PUID}
+      - TZ=${TZ}
+      - YTDL_OPTIONS={"writesubtitles":true,"subtitleslangs":["en","-live_chat"],"cookiefile":"/cookies/cookies.txt"}
+    ports:
+      - ${METUBE_WEB_PORT_8081}:8081
+    volumes:
+      # - /path/to/cookies:/cookies #optionally specify cookies file, must named cookies.txt
+      - ${MEDIA_LIB_DIR}/Youtube:/downloads
+      - ${BASE_CACHE_DIR}/metube:/downloads/.metube

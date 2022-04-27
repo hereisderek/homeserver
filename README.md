@@ -8,10 +8,11 @@ Utilize Docker to create automation tasks for home media server. this is heavily
 - remote media library with local mount/cache
   - [rclone](https://rclone.org/)
   - [mergerfs](https://github.com/trapexit/mergerfs)
-- torrent clients 
+- downloader/torrent clients 
   - [qbittorrent](https://hotio.dev/containers/qbittorrent/)
   - nzbget
   - transmission
+  - [metube](https://github.com/alexta69/metube)
 - *arr (*choose whatever you need*)
   - sonarr: series
   - radarr: movies
@@ -24,11 +25,20 @@ Utilize Docker to create automation tasks for home media server. this is heavily
   - [FlareSolverr](https://github.com/FlareSolverr/FlareSolverr): Bypass Cloudflare protection in Jackett. This runs a firefox in headless mode, and turns out to be too much for my cpu to handle *Optional*
 - media server
   - Jellyfin
-  - *Plex*
+  - Plex
   - *Emby*
 - other downloaders
   - Calibre
   - YoutubeDL
+  - [alexta69/metube]
+- File management
+  - [h5ai](https://github.com/awesometic/docker-h5ai)
+  - [nextcloud](https://github.com/nextcloud/docker)
+- Network/Vpn
+  - squid (salrashid123/squidproxy)
+  - [wireguard](https://docs.linuxserver.io/images/docker-wireguard)
+  - [*wireguard-ui*](https://github.com/ngoduykhanh/wireguard-ui)
+
 - Utilities
   - [samba](https://hub.docker.com/r/dperson/samba)
   - portainer: for docker management
@@ -177,6 +187,14 @@ Configurations are mostly stored in the `.env`, they are all prefixed by `BASE_`
     └── watch
 ```
 
+## wireguard
+To enable ipv4 and ipv6
+```
+sudo cat > /etc/sysctl.d/99-sysctl.conf << EOF
+net.ipv4.ip_forward = 1
+net.ipv6.conf.all.forwarding=1
+EOF
+```
 
 ## Other services 
  * [aria2-ariang-docker](https://github.com/wahyd4/aria2-ariang-docker) Aria2 + AriaNg + Filebrowser
@@ -223,4 +241,3 @@ Configurations are mostly stored in the `.env`, they are all prefixed by `BASE_`
     volumes:
       - /etc/hosts:/etc/hosts:ro # <- add this
   ```
-  

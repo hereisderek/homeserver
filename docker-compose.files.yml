@@ -1,0 +1,61 @@
+services:
+
+# disabled since it only support https
+
+  # nextcloud:
+  #   image: lscr.io/linuxserver/nextcloud
+  #   container_name: nextcloud
+  #   environment:
+  #     - PGID=${PGID}
+  #     - PUID=${PUID}
+  #     - UMASK=${UMASK}
+  #     - TZ=${TZ}
+  #   volumes:
+  #     - ${BASE_DATA_DIR}/nextcloud:/config
+  #     - ${MEDIA_LIB_DIR}:/storage
+  #     - ${MEDIA_LIB_DIR}:/data
+  #   ports:
+  #     - ${NEXTCLOUD_WEB_MANAGE_443}:443
+  #     - ${NEXTCLOUD_WEB_MANAGE_80}:80
+  #   restart: unless-stopped
+  #   network_mode: bridge
+
+
+  nextcloud:
+    image: nextcloud:latest
+    container_name: nextcloud
+    environment:
+      - PGID=${PGID}
+      - PUID=${PUID}
+      - UMASK=${UMASK}
+      - TZ=${TZ}
+      - NEXTCLOUD_ADMIN_USER=${NEXTCLOUD_WEB_ADMIN_USER}
+      - NEXTCLOUD_ADMIN_PASSWORD=${NEXTCLOUD_WEB_ADMIN_PWD}
+    volumes:
+      - ${BASE_DATA_DIR}/nextcloud/html:/var/www/html
+      - ${BASE_DATA_DIR}/nextcloud/mysql:/var/lib/mysql
+      - ${MEDIA_LIB_DIR}:/storage
+      - ${MEDIA_LIB_DIR}:/data
+    ports:
+      - ${NEXTCLOUD_WEB_MANAGE_443}:443
+      - ${NEXTCLOUD_WEB_MANAGE_80}:80
+    restart: unless-stopped
+    network_mode: bridge
+  
+  h5ai:
+    image: awesometic/h5ai
+    container_name: h5ai
+    environment:
+      - PGID=${PGID}
+      - PUID=${PUID}
+      - UMASK=${UMASK}
+      - TZ=${TZ}
+      - HTPASSWD=false
+    volumes:
+      - ${BASE_DATA_DIR}/h5ai:/config
+      - ${MEDIA_LIB_DIR}:/storage
+      - ${MEDIA_LIB_DIR}:/h5ai
+    ports:
+      - ${H5AI_WEB_80}:80
+    restart: unless-stopped
+    network_mode: bridge

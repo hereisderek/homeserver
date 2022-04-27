@@ -21,4 +21,39 @@ services:
       # - ${BASE_CACHE_DIR}/squid:/var/spool/squid
       # - ${BASE_CACHE_DIR}/squid/logs:/var/log/squid
     network_mode: bridge
-# docker pull ubuntu/squid
+
+  # https://docs.linuxserver.io/images/docker-wireguard
+  wireguard_server:
+    image: linuxserver/wireguard:latest
+    container_name: wireguard_server
+    ports:
+      - ${WIREGUARD_SERVER_PORT_51820}:51820/udp
+    sysctls:
+      - net.ipv4.conf.all.src_valid_mark=1
+      - net.ipv6.conf.all.disable_ipv6=0
+      # following on the host
+      # - net.ipv4.ip_forward=1
+      # - net.ipv6.conf.all.forwarding=1
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    environment:
+      - PGID=${PGID}
+      - PUID=${PUID}
+      - UMASK=${UMASK}
+      - TZ=${TZ}
+      - SERVERURL=${WIREGUARD_SERVER_SERVERURL:-auto} # External IP or domain name for docker host. Used in server mode
+      - PEERDNS=${WIREGUARD_SERVER_PEERDNS:-auto}
+      - PEERS=${WIREGUARD_SERVER_PEERS}
+
+    logging:
+      driver: json-file
+      options:
+        max-file: ${BASE_LOGGING_MAXFILE}
+        max-size: ${BASE_LOGGING_MAXSIZE}
+    restart: ${BASE_RESTART_STRATEGY}
+    volumes:
+      - /usr/src:/usr/src # for kernel moduel
+      - /lib/modules:/lib/modules
+      - /etc/localtime:/etc/localtime:ro
+      - ${BASE_DATA_DIR}/wireguard:/config

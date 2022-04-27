@@ -243,5 +243,25 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - ${BASE_DATA_DIR}/overseerr:/config
       - ${MEDIA_LIB_DIR}:/storage
+      # - /etc/hosts:/etc/hosts:ro # see README FAQ if unable to load media info
 
-  
+  tautulli:
+    image: lscr.io/linuxserver/tautulli
+    container_name: tautulli
+    environment:
+      - PGID=${PGID}
+      - PUID=${PUID}
+      - UMASK=${UMASK}
+      - TZ=${TZ}
+    logging:
+      driver: json-file
+      options:
+        max-file: ${BASE_LOGGING_MAXFILE}
+        max-size: ${BASE_LOGGING_MAXSIZE}
+    restart: ${BASE_RESTART_STRATEGY}
+    volumes:
+      - ${BASE_DATA_DIR}/tautulli:/config
+      - ${BASE_CACHE_DIR}/tautulli/logs:/config/logs
+      - ${BASE_CACHE_DIR}/tautulli/cache:/config/cache
+    ports:
+      - ${TAUTULLI_WEBSERVER_8081}:8181

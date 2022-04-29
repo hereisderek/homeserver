@@ -24,6 +24,7 @@ services:
   nextcloud:
     image: nextcloud:latest
     container_name: nextcloud
+    user: "${PUID}:${PGID}"
     environment:
       - PGID=${PGID}
       - PUID=${PUID}

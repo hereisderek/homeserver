@@ -27,6 +27,7 @@ Utilize Docker to create automation tasks for home media server. this is heavily
   - Jellyfin
   - Plex
   - *Emby*
+  - [deemix](https://gitlab.com/Bockiii/deemix-docker) music player
 - other downloaders
   - Calibre
   - YoutubeDL
@@ -49,9 +50,8 @@ Utilize Docker to create automation tasks for home media server. this is heavily
 
 
 ### To be added
-- Proxy/VPN
-  - Wireguard
 - Cabby
+- 
 
 ### Players:
 To run without nvidia driver (with profile):

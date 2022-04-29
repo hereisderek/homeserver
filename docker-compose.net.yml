@@ -57,3 +57,94 @@ services:
       - /lib/modules:/lib/modules
       - /etc/localtime:/etc/localtime:ro
       - ${BASE_DATA_DIR}/wireguard:/config
+
+  # wireguard_server_ui:
+  #   image: embarkstudios/wireguard-ui:latest
+  #   entrypoint: "/wireguard-ui"
+  #   privileged: true
+  #   # network_mode: "host"
+  #   volumes:
+  #     - ${BASE_DATA_DIR}/wireguard_server_ui:/config
+  #   environment:
+  #     - WIREGUARD_UI_LISTEN_ADDRESS=:8080
+  #     - WIREGUARD_UI_LOG_LEVEL=debug
+  #     - WIREGUARD_UI_DATA_DIR=/config
+  #     - WIREGUARD_UI_WG_ENDPOINT=your-andpoint-address:51820
+  #     - WIREGUARD_UI_CLIENT_IP_RANGE=192.168.10.0/24
+  #    # - WIREGUARD_UI_WG_DNS=192.168.10.0
+  #     - WIREGUARD_UI_NAT=true
+  #     - WIREGUARD_UI_NAT_DEVICE=eth0
+  #    # - WIREGUARD_UI_WG_DEVICE_NAME=wg0
+
+
+  # client
+  wireguard_web:
+    container_name: wireguard_web
+    image: perara/wg-manager
+    logging:
+      driver: json-file
+      options:
+        max-file: ${BASE_LOGGING_MAXFILE}
+        max-size: ${BASE_LOGGING_MAXSIZE}
+    restart: ${BASE_RESTART_STRATEGY}
+    sysctls:
+      net.ipv6.conf.all.disable_ipv6: 0  # Required for IPV6
+    cap_add:
+      - NET_ADMIN
+    #network_mode: host # Alternatively
+    ports:
+      #  - ${WIREGUARD_WEB_PORTS}:51800-51900/udp
+       - ${WIREGUARD_WEB_PORT}:51821/udp
+       - ${WIREGUARD_WEB_WEB_MANAGMENT}:8888
+    volumes:
+      - /usr/src:/usr/src # for kernel moduel
+      - /lib/modules:/lib/modules
+      - /etc/localtime:/etc/localtime:ro
+      - ${BASE_DATA_DIR}/wireguard_web:/config
+    profiles: [disabled]
+    environment:
+      HOST: 0.0.0.0
+      PORT: 8888
+      ADMIN_USERNAME: ${WIREGUARD_WEB_ADMIN_USER}
+      ADMIN_PASSWORD: ${WIREGUARD_WEB_PWD}
+      WEB_CONCURRENCY: 1
+
+
+  v2ray:
+    container_name: v2ray
+    image: v2ray/official
+    logging:
+      driver: json-file
+      options:
+        max-file: ${BASE_LOGGING_MAXFILE}
+        max-size: ${BASE_LOGGING_MAXSIZE}
+    restart: ${BASE_RESTART_STRATEGY}
+    sysctls:
+      net.ipv6.conf.all.disable_ipv6: 0  # Required for IPV6
+    cap_add:
+      - NET_ADMIN
+    ports:
+       - ${V2RAY_WEB}:8888
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${BASE_DATA_DIR}/v2ray:/etc/v2ray
+    profiles: [disabled]
+    command: v2ray -config=/etc/v2ray/config.json
+
+
+  speedtest:
+    container_name: speedtest
+    image: adolfintel/speedtest
+    logging:
+      driver: json-file
+      options:
+        max-file: ${BASE_LOGGING_MAXFILE}
+        max-size: ${BASE_LOGGING_MAXSIZE}
+    restart: ${BASE_RESTART_STRATEGY}
+    ports:
+      - ${SPEEDTEST_WEB}:80
+    environment:
+      TELEMETRY: true
+      MODE: standalone
+      PASSWORD: ${SPEEDTEST_STATS_PWD}
+

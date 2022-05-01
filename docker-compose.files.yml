@@ -40,8 +40,8 @@ services:
     ports:
       - ${NEXTCLOUD_WEB_MANAGE_443}:443
       - ${NEXTCLOUD_WEB_MANAGE_80}:80
-    restart: unless-stopped
-    network_mode: bridge
+    restart: ${BASE_RESTART_STRATEGY}
+    
   
   h5ai:
     image: awesometic/h5ai
@@ -58,5 +58,5 @@ services:
       - ${MEDIA_LIB_DIR}:/h5ai
     ports:
       - ${H5AI_WEB_80}:80
-    restart: unless-stopped
-    network_mode: bridge
+    restart: ${BASE_RESTART_STRATEGY}
+    

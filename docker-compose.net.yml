@@ -144,7 +144,7 @@ services:
     ports:
       - ${SPEEDTEST_WEB}:80
     environment:
-      TELEMETRY: true
+      TELEMETRY: 'true'
       MODE: standalone
       PASSWORD: ${SPEEDTEST_STATS_PWD}
 

@@ -46,7 +46,9 @@ Utilize Docker to create automation tasks for home media server. this is heavily
   - ddclient
   - file management, such as File Browser, h5ai, nextcloud etc.
   - Duplicati
-  - 
+- DDNS
+  - [ddns-updater](https://github.com/qdm12/ddns-updater)
+  - [traefik](https://hub.docker.com/_/traefik)
 
 
 ### To be added

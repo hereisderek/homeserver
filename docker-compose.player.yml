@@ -41,6 +41,30 @@ services:
     ports:
       - ${PLEX_WEB_32400}:32400
 
+
+  emby:
+    image: lscr.io/linuxserver/emby:latest
+    container_name: emby
+    environment:
+      - TZ=${TZ}
+      - PUID=${PUID}
+      - PGID=${PGID}
+    volumes:
+      - ${BASE_CACHE_DIR}/emby/cache:/cache
+      - ${BASE_CACHE_DIR}/emby/metadata:/config/metadata
+      - ${BASE_CACHE_DIR}/emby/logs:/config/logs
+      - ${BASE_CACHE_DIR}/emby/transcodes:/config/transcoding-temp
+      - ${BASE_DATA_DIR}/emby:/config
+      - ${MEDIA_LIB_DIR}:/storage
+      - /opt/vc/lib:/opt/vc/lib #optional
+    ports:
+      - ${EMBY_WEB_8096}:8096
+      - ${EMBY_8920}:8920 #optional
+    devices:
+      - /dev/dri:/dev/dri #optional
+    restart: ${BASE_RESTART_STRATEGY}  
+    
+
   # https://gitlab.com/Bockiii/deemix-docker
   deemix:
     image: registry.gitlab.com/bockiii/deemix-docker

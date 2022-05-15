@@ -18,8 +18,33 @@ services:
       - ${BASE_DATA_DIR}/mistserver:/config
       - ${MEDIA_LIB_DIR}:/media
       - /etc/localhost:/etc/localhost:ro
+    devices:
+      - /dev/dri:/dev/dri
     ports:
       - ${MISTSERVER_WEB_4242}:4242
       - ${MISTSERVER_RTMP_1935}:1935
       - ${MISTSERVER_RTSP_554}:554
       - ${MISTSERVER_HLS_8080}:8080
+
+  owncast:
+    image: gabekangas/owncast:latest
+    container_name: owncast
+    logging:
+      driver: json-file
+      options:
+        max-file: ${BASE_LOGGING_MAXFILE}
+        max-size: ${BASE_LOGGING_MAXSIZE}
+    restart: ${BASE_RESTART_STRATEGY}
+    environment:
+      - TZ=${TZ}
+      - PUID=${PUID}
+      - PGID=${PGID}
+    devices:
+      - /dev/dri:/dev/dri
+    volumes:
+      - ${BASE_DATA_DIR}/owncast:/app/data
+      - ${MEDIA_LIB_DIR}:/media
+      - /etc/localhost:/etc/localhost:ro
+    ports:
+      - ${OWNCAST_WEB_8080}:8080
+      - ${OWNCAST_RTMP_1935}:1935

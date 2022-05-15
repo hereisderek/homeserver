@@ -1,5 +1,5 @@
-
 services:
+
   traefik:
     container_name: traefik
     image: "traefik:latest"
@@ -38,49 +38,46 @@ services:
       - "traefik.http.routers.whoami.entrypoints=web,websecure"
       - "traefik.http.routers.whoami.tls.certresolver=myresolver"
 
+  ddns_updater:
+      image: qmcgaw/ddns-updater
+      container_name: ddns-updater
+      ports:
+        - ${DDNS_UPDATER_WEB}:8000/tcp
+      logging:
+        driver: json-file
+        options:
+          max-file: ${BASE_LOGGING_MAXFILE}
+          max-size: ${BASE_LOGGING_MAXSIZE}
+      environment:
+        - TZ=${TZ}
+        - PUID=${PUID}
+        - PGID=${PGID}
+        - CONFIG=
+        - PERIOD=5m
+        - UPDATE_COOLDOWN_PERIOD=5m
+        - PUBLICIP_FETCHERS=all
+        - PUBLICIP_HTTP_PROVIDERS=all
+        - PUBLICIPV4_HTTP_PROVIDERS=all
+        # - PUBLICIPV6_HTTP_PROVIDERS=all
+        - PUBLICIP_DNS_PROVIDERS=all
+        - PUBLICIP_DNS_TIMEOUT=3s
+        - HTTP_TIMEOUT=10s
 
+        # Web UI
+        - LISTENING_PORT=8000
+        - ROOT_URL=/
 
+        # Backup
+        - BACKUP_PERIOD=0 # 0 to disable
+        - BACKUP_DIRECTORY=/updater/data
 
-ddns-updater:
-    image: qmcgaw/ddns-updater
-    container_name: ddns-updater
-    ports:
-      - ${DDNS_UPDATER_WEB}:8000/tcp
-    logging:
-      driver: json-file
-      options:
-        max-file: ${BASE_LOGGING_MAXFILE}
-        max-size: ${BASE_LOGGING_MAXSIZE}
-    environment:
-      - TZ=${TZ}
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - CONFIG=
-      - PERIOD=5m
-      - UPDATE_COOLDOWN_PERIOD=5m
-      - PUBLICIP_FETCHERS=all
-      - PUBLICIP_HTTP_PROVIDERS=all
-      - PUBLICIPV4_HTTP_PROVIDERS=all
-      # - PUBLICIPV6_HTTP_PROVIDERS=all
-      - PUBLICIP_DNS_PROVIDERS=all
-      - PUBLICIP_DNS_TIMEOUT=3s
-      - HTTP_TIMEOUT=10s
-
-      # Web UI
-      - LISTENING_PORT=8000
-      - ROOT_URL=/
-
-      # Backup
-      - BACKUP_PERIOD=0 # 0 to disable
-      - BACKUP_DIRECTORY=/updater/data
-
-      # Other
-      - LOG_LEVEL=info
-      - LOG_CALLER=hidden
-      - SHOUTRRR_ADDRESSES=
-    
-    volumes:
-      - ${BASE_DATA_DIR}/ddns-updater:/updater/data
-      # - ${BASE_CACHE_DIR}/jellyfin/cache:/cache
-    restart: ${BASE_RESTART_STRATEGY}  
+        # Other
+        - LOG_LEVEL=info
+        - LOG_CALLER=hidden
+        - SHOUTRRR_ADDRESSES=
+      
+      volumes:
+        - ${BASE_DATA_DIR}/ddns_updater:/updater/data
+        # - ${BASE_CACHE_DIR}/jellyfin/cache:/cache
+      restart: ${BASE_RESTART_STRATEGY}  
 

@@ -1,0 +1,25 @@
+services:
+
+  # https://hub.docker.com/r/r0gger/mistserver
+  mistserver:
+    image: r0gger/mistserver:latest
+    container_name: mistserver
+    logging:
+      driver: json-file
+      options:
+        max-file: ${BASE_LOGGING_MAXFILE}
+        max-size: ${BASE_LOGGING_MAXSIZE}
+    restart: ${BASE_RESTART_STRATEGY}
+    environment:
+      - TZ=${TZ}
+      - PUID=${PUID}
+      - PGID=${PGID}
+    volumes:
+      - ${BASE_DATA_DIR}/mistserver:/config
+      - ${MEDIA_LIB_DIR}:/media
+      - /etc/localhost:/etc/localhost:ro
+    ports:
+      - ${MISTSERVER_WEB_4242}:4242
+      - ${MISTSERVER_RTMP_1935}:1935
+      - ${MISTSERVER_RTSP_554}:554
+      - ${MISTSERVER_HLS_8080}:8080

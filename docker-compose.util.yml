@@ -88,3 +88,18 @@ services:
     volumes:
       - ${BASE_DATA_DIR}/hdidle:/config
     profiles: ["disabled"]
+
+
+  wetty:
+    image: wettyoss/wetty
+    container_name: wetty
+    command:
+      - --base=/
+      - --ssh-host=ssh.example.com
+    ports:
+      - ${WETTY_WEB_3000}:3000
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.wetty.rule=Host(`wetty.example.com`)"
+      # - "traefik.http.routers.wetty.tls.certResolver=default"
+      # - "traefik.http.routers.wetty.tls=true"

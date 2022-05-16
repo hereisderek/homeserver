@@ -28,6 +28,7 @@ Utilize Docker to create automation tasks for home media server. this is heavily
   - Plex
   - *Emby*
   - [deemix](https://gitlab.com/Bockiii/deemix-docker) music player
+  - [navidrome](https://www.navidrome.org/docs/installation/docker/) music player
 - other downloaders
   - Calibre
   - YoutubeDL
@@ -53,7 +54,8 @@ Utilize Docker to create automation tasks for home media server. this is heavily
 
 ### To be added
 - Cabby
-- 
+- https://github.com/hectorqin/reader
+- https://blog.laoda.de/archives/docker-compose-install-filerun
 
 ### Players:
 To run without nvidia driver (with profile):

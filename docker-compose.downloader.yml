@@ -108,16 +108,51 @@ services:
   metube:
     image: alexta69/metube
     container_name: metube
-    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-file: ${BASE_LOGGING_MAXFILE}
+        max-size: ${BASE_LOGGING_MAXSIZE}
+    restart: ${BASE_RESTART_STRATEGY}
     user: "${PUID}:${PGID}"
     environment:
       - PGID=${PGID}
       - PUID=${PUID}
       - TZ=${TZ}
-      - YTDL_OPTIONS={"writesubtitles":true,"subtitleslangs":["en","-live_chat"],"cookiefile":"/cookies/cookies.txt"}
+      - YTDL_OPTIONS={"writesubtitles":true,"subtitleslangs":["en","cn","-live_chat"],"cookiefile":"/downloads/cookies.txt"}
+      - OUTPUT_TEMPLATE_rem="%(playlist)s/%(playlist_index)s - %(title)s.%(ext)s"
+      - OUTPUT_TEMPLATE="%(uploader)s/%(playlist)s/%(playlist_index)s - %(title)s.%(ext)s"
     ports:
       - ${METUBE_WEB_PORT_8081}:8081
     volumes:
       # - /path/to/cookies:/cookies #optionally specify cookies file, must named cookies.txt
       - ${MEDIA_LIB_DIR}/Youtube:/downloads
       - ${BASE_CACHE_DIR}/metube:/downloads/.metube
+
+  ytdl_material:
+    container_name: ytdl_material
+    logging:
+      driver: json-file
+      options:
+        max-file: ${BASE_LOGGING_MAXFILE}
+        max-size: ${BASE_LOGGING_MAXSIZE}
+    restart: ${BASE_RESTART_STRATEGY}
+    user: "${PUID}:${PGID}"
+    environment:
+      - ALLOW_CONFIG_MUTATIONS='true'
+      - GID=${PGID}
+      - UID=${PUID}
+      - PGID=${PGID}
+      - PUID=${PUID}
+      - TZ=${TZ}
+    volumes:
+      - ${MEDIA_LIB_DIR}/ytdl_material:/downloads
+      - ${MEDIA_LIB_DIR}/ytdl_material/audio:/app/audio
+      - ${MEDIA_LIB_DIR}/ytdl_material/video:/app/video
+      - ${MEDIA_LIB_DIR}/ytdl_material/subscriptions:/app/subscriptions
+
+      - ${BASE_DATA_DIR}/ytdl_material/appdata:/app/appdata
+      - ${BASE_DATA_DIR}/ytdl_material/users:/app/users
+    ports:
+        - ${YTUBE_MATERIAL_WEB_PORT_17442}:17442
+    image: tzahi12345/youtubedl-material:latest

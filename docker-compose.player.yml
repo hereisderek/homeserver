@@ -9,13 +9,19 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - JELLYFIN_PublishedServerUrl='' #optional
+    logging:
+      driver: json-file
+      options:
+        max-file: ${BASE_LOGGING_MAXFILE}
+        max-size: ${BASE_LOGGING_MAXSIZE}
+    restart: ${BASE_RESTART_STRATEGY}
     volumes:
       - ${BASE_DATA_DIR}/jellyfin:/config
       - ${BASE_CACHE_DIR}/jellyfin/cache:/cache
       - ${BASE_CACHE_DIR}/jellyfin/metadata:/config/metadata
       - ${BASE_CACHE_DIR}/jellyfin/transcodes:/config/transcodes
       - ${MEDIA_LIB_DIR}:/storage
-    restart: ${BASE_RESTART_STRATEGY}  
+    
     ports:
       - ${JELLYFIN_WEB_8096}:8096
       # - 8920:8920 #optional https
@@ -27,6 +33,12 @@ services:
     image: lscr.io/linuxserver/plex:latest
     container_name: plex
       #user: "${PUID}:${PGID}"
+    logging:
+      driver: json-file
+      options:
+        max-file: ${BASE_LOGGING_MAXFILE}
+        max-size: ${BASE_LOGGING_MAXSIZE}
+    restart: ${BASE_RESTART_STRATEGY}
     environment:
       - TZ=${TZ}
       - PUID=${PUID}
@@ -37,7 +49,7 @@ services:
       - ${BASE_DATA_DIR}/plex:/config
       - ${MEDIA_LIB_DIR}:/storage
       - ${BASE_CACHE_DIR}/plex/transcodes:/cache/transcodes
-    restart: ${BASE_RESTART_STRATEGY}  
+    
     ports:
       - ${PLEX_WEB_32400}:32400
 
@@ -45,6 +57,12 @@ services:
   emby:
     image: lscr.io/linuxserver/emby:latest
     container_name: emby
+    logging:
+      driver: json-file
+      options:
+        max-file: ${BASE_LOGGING_MAXFILE}
+        max-size: ${BASE_LOGGING_MAXSIZE}
+    restart: ${BASE_RESTART_STRATEGY}
     environment:
       - TZ=${TZ}
       - PUID=${PUID}
@@ -62,13 +80,18 @@ services:
       - ${EMBY_8920}:8920 #optional
     devices:
       - /dev/dri:/dev/dri #optional
-    restart: ${BASE_RESTART_STRATEGY}  
     
 
   # https://gitlab.com/Bockiii/deemix-docker
   deemix:
     image: registry.gitlab.com/bockiii/deemix-docker
     container_name: Deemix
+    logging:
+      driver: json-file
+      options:
+        max-file: ${BASE_LOGGING_MAXFILE}
+        max-size: ${BASE_LOGGING_MAXSIZE}
+    restart: ${BASE_RESTART_STRATEGY}
     volumes:
       - ${BASE_DATA_DIR}/deemix:/config
       - ${MEDIA_LIB_DIR}:/storage
@@ -82,3 +105,89 @@ services:
     ports:
       - ${DEEMIX_WEB}:6595
 
+  # https://hub.docker.com/r/deluan/navidrome
+  navidrome:
+    user: ${PUID}:${PGID}
+    container_name: navidrome
+    # image: deluan/navidrome:latest
+    image: deluan/navidrome:develop
+    logging:
+      driver: json-file
+      options:
+        max-file: ${BASE_LOGGING_MAXFILE}
+        max-size: ${BASE_LOGGING_MAXSIZE}
+    restart: ${BASE_RESTART_STRATEGY}
+    ports:
+      - ${NAVIDROME_WEB_4533}:4533
+    environment:
+      - TZ=${TZ}
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - ND_ENABLETRANSCODINGCONFIG=true
+      - ND_TRANSCODINGCACHESIZE="512MB"
+      - ND_SESSIONTIMEOUT=48h
+      - ND_SCANSCHEDULE=12h
+      - ND_LASTFM_ENABLED=true      
+
+      - ND_LASTFM_APIKEY=${ND_LASTFM_APIKEY:-} 
+      - ND_LASTFM_SECRET=${ND_LASTFM_SECRET:-} 
+      - ND_LASTFM_LANGUAGE=${ND_LASTFM_LANGUAGE:-en}
+      - ND_SPOTIFY_ID=${ND_SPOTIFY_ID:-}
+      - ND_SPOTIFY_SECRET=${ND_SPOTIFY_SECRET:-}
+      - ND_BASEURL=${ND_BASEURL:-}
+    volumes:
+      - ${MEDIA_LIB_DIR}/Music:/music:ro
+      - ${MEDIA_LIB_DIR}:/storage
+      - ${BASE_DATA_DIR}/navidrome:/data
+      - ${BASE_CACHE_DIR}/navidrome/cache:/data/cache
+      - ${BASE_CACHE_DIR}/navidrome/transcode:/data/cache/transcoding
+
+
+
+# https://github.com/hectorqin/reader/blob/master/docker-compose.yaml
+# https://raw.githubusercontent.com/XIU2/Yuedu/master/shuyuan
+  reader:
+    user: ${PUID}:${PGID}
+    image: hectorqin/reader
+    #image: hectorqin/reader:openj9-latest #docker镜像，arm64架构和小内存机器可以使用
+    container_name: reader
+    logging:
+      driver: json-file
+      options:
+        max-file: ${BASE_LOGGING_MAXFILE}
+        max-size: ${BASE_LOGGING_MAXSIZE}
+    restart: ${BASE_RESTART_STRATEGY}
+    #限制镜像最大资源占用(可选) 低内存(<=2G)可考虑限制 使用此方式启动需加--compatibility,例如   docker-compose --compatibility up -d
+    deploy:
+      resources:
+        limits:  #最大限制资源
+          cpus: '0.30' #cpu建议不做限制,保持注释即可,1表示100%
+          memory: 1024M
+        # reservations:  #保留最小资源
+        #   cpus: 0.25
+        #   memory: 256M
+    ports:
+      - ${READER_WEB_8080}:8080 #4396端口映射可自行修改
+    volumes:
+      # - ${MEDIA_LIB_DIR}/Books:/Books
+      - ${MEDIA_LIB_DIR}:/storage #数据映射目录 /home/reader/storage 映射目录可自行修改
+      #可配置默认书源,默认书源存放于数据映射目录中:storage/data/default/bookSource.json
+      #书源参考(大部分可通用):https://www.legado.top/blog/book-source
+      #wget -c https://namofree.gitee.io/yuedu3/legado3_booksource_by_Namo.json -O /home/reader/storage/data/default/bookSource.json
+
+      - ${BASE_DATA_DIR}/reader:/storage/data/ #数据映射目录 /home/reader/storage 映射目录可自行修改
+      - ${BASE_CACHE_DIR}/reader/logs:/logs
+      
+    environment:
+      - TZ=${TZ}
+      - PUID=${PUID}
+      - PGID=${PGID}
+      
+      - SPRING_PROFILES_ACTIVE=prod
+      - READER_APP_USERLIMIT=50 #用户上限,默认50
+      - READER_APP_USERBOOKLIMIT=200 #用户书籍上限,默认200
+      - READER_APP_CACHECHAPTERCONTENT=true #开启缓存章节内容 V2.0
+      # 下面都是多用户模式配置
+      - READER_APP_SECURE=true #开启登录鉴权，开启后将支持多用户模式
+      - READER_APP_SECUREKEY=${READER_APP_SECUREKEY:-admin}  #管理员密码  建议修改
+      - READER_APP_INVITECODE=${READER_APP_INVITECODE:-} #注册邀请码 建议修改,如不需要可注释或删除

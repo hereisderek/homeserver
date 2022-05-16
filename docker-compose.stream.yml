@@ -48,3 +48,42 @@ services:
     ports:
       - ${OWNCAST_WEB_8080}:8080
       - ${OWNCAST_RTMP_1935}:1935
+
+# https://airensoft.gitbook.io/ovenmediaengine/getting-started
+# docker run -d \
+# -p 1935:1935 -p 4000-4005:4000-4005/udp -p 3333:3333 -p 3478:3478 -p 8080:8080 -p 9000:9000 -p 9999:9999/udp -p 10006-10010:10006-10010/udp \
+# airensoft/ovenmediaengine:0.13.2
+  ovenmediaengine:
+    image: gabekangas/owncast:latest
+    container_name: ovenmediaengine
+    logging:
+      driver: json-file
+      options:
+        max-file: ${BASE_LOGGING_MAXFILE}
+        max-size: ${BASE_LOGGING_MAXSIZE}
+    restart: ${BASE_RESTART_STRATEGY}
+    environment:
+      - TZ=${TZ}
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - OME_ORIGIN_PORT=${OME_ORIGIN_PORT_9000}
+      - OME_RTMP_PROV_PORT=${OME_RTMP_PROV_PORT_1935}
+      - OME_MPEGTS_PROV_PORT=${OME_MPEGTS_PROV_PORT_4000_4005}
+    devices:
+      - /dev/dri:/dev/dri
+    volumes:
+      - ${BASE_DATA_DIR}/ovenmediaengine:/opt/ovenmediaengine/bin
+      # - ${BASE_DATA_DIR}/ovenmediaengine/origin_conf:/opt/ovenmediaengine/bin/origin_conf
+      # - ${BASE_DATA_DIR}/ovenmediaengine/edge_conf:/opt/ovenmediaengine/bin/edge_conf
+      - ${MEDIA_LIB_DIR}:/media
+      - /etc/localhost:/etc/localhost:ro
+    ports:
+      - ${OME_ORIGIN_PORT_9000}:${OME_ORIGIN_PORT_9000}
+      - ${OME_RTMP_PROV_PORT_1935}:${OME_RTMP_PROV_PORT_1935}
+      # - ${OME_RTMP_PROV_PORT_1935}:1935
+      - ${OME_DASH_HLS_PUB_PORT_8080}:8080
+      - ${OME_SIGNALLING_PORT_3333}:3333
+      # - ${OME_MPEGTS_PROV_PORT_4000_4005}:4000-4005/udp
+      - ${OME_MPEGTS_PROV_PORT_4000_4005}
+
+  # https://wiki.openstreamingplatform.com/Install/Docker

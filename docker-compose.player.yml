@@ -169,20 +169,23 @@ services:
     ports:
       - ${READER_WEB_8080}:8080 #4396端口映射可自行修改
     volumes:
-      # - ${MEDIA_LIB_DIR}/Books:/Books
-      - ${MEDIA_LIB_DIR}:/storage #数据映射目录 /home/reader/storage 映射目录可自行修改
+      
+      - ${BASE_DATA_DIR}/reader:/storage #数据映射目录 /home/reader/storage 映射目录可自行修改
       #可配置默认书源,默认书源存放于数据映射目录中:storage/data/default/bookSource.json
       #书源参考(大部分可通用):https://www.legado.top/blog/book-source
-      #wget -c https://namofree.gitee.io/yuedu3/legado3_booksource_by_Namo.json -O /home/reader/storage/data/default/bookSource.json
+      #wget -c https://namofree.gitee.io/yuedu3/legado3_booksource_by_Namo.json -O ${BASE_DATA_DIR}/reader/data/default/bookSource.json
+      #wget -c https://yuedu.xiu2.xyz/shuyuan -O ${BASE_DATA_DIR}/reader/data/default/xiu2.json
 
-      - ${BASE_DATA_DIR}/reader:/storage/data/ #数据映射目录 /home/reader/storage 映射目录可自行修改
+      - ${MEDIA_LIB_DIR}/Books:/storage/localStore
+      # - ${BASE_CACHE_DIR}/reader/assets:/storage/assets
+      - ${BASE_CACHE_DIR}/reader/cache:/storage/cache
       - ${BASE_CACHE_DIR}/reader/logs:/logs
       
     environment:
       - TZ=${TZ}
       - PUID=${PUID}
       - PGID=${PGID}
-      
+
       - SPRING_PROFILES_ACTIVE=prod
       - READER_APP_USERLIMIT=50 #用户上限,默认50
       - READER_APP_USERBOOKLIMIT=200 #用户书籍上限,默认200

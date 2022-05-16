@@ -56,6 +56,8 @@ Utilize Docker to create automation tasks for home media server. this is heavily
 - Cabby
 - https://github.com/hectorqin/reader
 - https://blog.laoda.de/archives/docker-compose-install-filerun
+- https://blog.laoda.de/archives/docker-install-alist
+
 
 ### Players:
 To run without nvidia driver (with profile):

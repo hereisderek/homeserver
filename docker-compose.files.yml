@@ -61,22 +61,60 @@ services:
     restart: ${BASE_RESTART_STRATEGY}
     
 
+  
   filebrowser:
     # image: langren1353/filebrowser-ckplayer
     image: filebrowser/filebrowser
     container_name: filebrowser
     user: ${PUID}:${PGID}
+    # profiles: [disabled]
+    environment:
+      - PGID=${PGID}
+      - PUID=${PUID}
+      - UMASK=${UMASK}
+      - TZ=${TZ}
+      - FB_DATABASE=/config/database.db
+      - FB_USERNAME=${FILEBROWSER_USERNAME:-admin}
+      # - FB_PASSWORD=${FILEBROWSER_PWD:-}
+      
+    command:
+      # - "-c /config"
+      - "--cache-dir=/cache"
+      - "-d=/config/database.db"
+      - "-p=8080"
+      
+    volumes:
+      - ${BASE_DATA_DIR}/filebrowser:/config
+      - ${BASE_CACHE_DIR}/filebrowser/cache:/cache
+      - ${MEDIA_LIB_DIR}:/storage
+      - ${MEDIA_LIB_DIR}:/srv
+    ports:
+      - ${FILEBROWSER_WEB_PORT}:8080
+    restart: ${BASE_RESTART_STRATEGY}
+
+    
+  alist:
+    image: xhofe/alist:latest
+    container_name: alist
+    user: ${PUID}:${PGID}
+    profiles: [disabled]
+    logging:
+      driver: json-file
+      options:
+        max-file: ${BASE_LOGGING_MAXFILE}
+        max-size: ${BASE_LOGGING_MAXSIZE}
+    restart: ${BASE_RESTART_STRATEGY}
     environment:
       - PGID=${PGID}
       - PUID=${PUID}
       - UMASK=${UMASK}
       - TZ=${TZ}
     volumes:
-      - ${BASE_DATA_DIR}/filebrowser/database.db:/database.db
-      - ${BASE_DATA_DIR}/filebrowser/.filebrowser.json:/.filebrowser.json
-      - ${BASE_DATA_DIR}/filebrowser:/config
+      - ${BASE_DATA_DIR}/alist:/opt/alist/data
       - ${MEDIA_LIB_DIR}:/storage
-      - ${MEDIA_LIB_DIR}:/srv
     ports:
-      - ${FILEBROWSER_WEB_PORT}:80
-    restart: ${BASE_RESTART_STRATEGY}
+      - ${FILEBROWSER_WEB_PORT}:5244
+
+
+
+    

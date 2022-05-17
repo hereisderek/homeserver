@@ -57,6 +57,7 @@ Utilize Docker to create automation tasks for home media server. this is heavily
 - https://github.com/hectorqin/reader
 - https://blog.laoda.de/archives/docker-compose-install-filerun
 - https://blog.laoda.de/archives/docker-install-alist
+- https://alist-doc.nn.ci/en/docs/install/docker
 
 
 ### Players:

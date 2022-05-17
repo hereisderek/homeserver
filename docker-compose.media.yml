@@ -290,3 +290,31 @@ services:
       - ${MEDIA_LIB_DIR}:/downloads
     ports:
       - ${LAZY_LIBRARIAN_5299}:5299
+
+
+
+  headphones:
+    image: lscr.io/linuxserver/headphones:latest
+    container_name: headphones
+    ports:
+      - ${HEADPHONES_WEB_PORT_8181}:8181
+    environment:
+      - PGID=${PGID}
+      - PUID=${PUID}
+      - TZ=${TZ}
+    logging:
+      driver: json-file
+      options:
+        max-file: ${BASE_LOGGING_MAXFILE}
+        max-size: ${BASE_LOGGING_MAXSIZE}
+    restart: ${BASE_RESTART_STRATEGY}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${BASE_DATA_DIR}/headphones:/config
+
+      - ${BASE_CACHE_DIR}/headphones/cache:/config/cache
+      - ${BASE_CACHE_DIR}/headphones/logs:/config/logs
+      - ${BASE_CACHE_DIR}/headphones/transcode:/config/transcode
+      - ${MEDIA_LIB_DIR}:/storage
+      # - ${MEDIA_LIB_DIR}/Music:/music
+      # - ${MEDIA_LIB_DIR}/downloads/music:/downloads

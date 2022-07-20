@@ -23,6 +23,8 @@ services:
 
   nextcloud:
     image: nextcloud:latest
+    profiles:
+      - disabled
     container_name: nextcloud
     user: ${PUID}:${PGID}
     environment:
@@ -81,7 +83,7 @@ services:
       # - "-c /config"
       - "--cache-dir=/cache"
       - "-d=/config/database.db"
-      - "-p=8080"
+      - "-p=80"
       
     volumes:
       - ${BASE_DATA_DIR}/filebrowser:/config
@@ -89,7 +91,7 @@ services:
       - ${MEDIA_LIB_DIR}:/storage
       - ${MEDIA_LIB_DIR}:/srv
     ports:
-      - ${FILEBROWSER_WEB_PORT}:8080
+      - ${FILEBROWSER_WEB_PORT}:80
     restart: ${BASE_RESTART_STRATEGY}
 
     

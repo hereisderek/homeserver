@@ -42,6 +42,11 @@ services:
     ports:
       - ${QBIT_MANAGE_PORT_8080}:8080
       - ${QBIT_PORT_9000}:9000
+    deploy:
+      resources:
+        limits: 
+          cpus: '0.50'
+          memory: 512M
     environment:
       - PGID=${PGID}
       - PUID=${PUID}
@@ -114,7 +119,7 @@ services:
         max-file: ${BASE_LOGGING_MAXFILE}
         max-size: ${BASE_LOGGING_MAXSIZE}
     restart: ${BASE_RESTART_STRATEGY}
-    user: "${PUID}:${PGID}"
+    user: ${PUID}:${PGID}
     environment:
       - PGID=${PGID}
       - PUID=${PUID}
@@ -131,13 +136,14 @@ services:
 
   ytdl_material:
     container_name: ytdl_material
+    profiles: [disabled]
     logging:
       driver: json-file
       options:
         max-file: ${BASE_LOGGING_MAXFILE}
         max-size: ${BASE_LOGGING_MAXSIZE}
     restart: ${BASE_RESTART_STRATEGY}
-    user: "${PUID}:${PGID}"
+    user: ${PUID}:${PGID}
     environment:
       - ALLOW_CONFIG_MUTATIONS='true'
       - GID=${PGID}

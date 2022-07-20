@@ -1,9 +1,16 @@
 services:
+
+
+######### Video
+
+
   # https://docs.linuxserver.io/images/docker-jellyfin
   jellyfin:
     # image: lscr.io/linuxserver/jellyfin:nightly
     image: nyanmisaka/jellyfin:latest
     container_name: jellyfin
+    profiles:
+      - disabled
     environment:
       - TZ=${TZ}
       - PUID=${PUID}
@@ -32,7 +39,7 @@ services:
   plex:
     image: lscr.io/linuxserver/plex:latest
     container_name: plex
-      #user: "${PUID}:${PGID}"
+      #user: ${PUID}:${PGID}
     logging:
       driver: json-file
       options:
@@ -81,6 +88,12 @@ services:
     devices:
       - /dev/dri:/dev/dri #optional
     
+
+
+
+
+############# Music 
+
 
   # https://gitlab.com/Bockiii/deemix-docker
   deemix:
@@ -143,6 +156,51 @@ services:
       - ${BASE_CACHE_DIR}/navidrome/transcode:/data/cache/transcoding
 
 
+  # https://github.com/linuxserver/docker-airsonic-advanced
+  airsonic:
+    # user: ${PUID}:${PGID}
+    image: lscr.io/linuxserver/airsonic-advanced:latest
+    container_name: airsonic
+    profiles: ["disabled"]
+    logging:
+      driver: json-file
+      options:
+        max-file: ${BASE_LOGGING_MAXFILE}
+        max-size: ${BASE_LOGGING_MAXSIZE}
+    restart: ${BASE_RESTART_STRATEGY}
+    deploy:
+      resources:
+        limits: 
+          cpus: '0.30'
+          memory: 256M
+    devices:
+      - /dev/snd:/dev/snd #optional
+    ports:
+      - ${AIRSONIC_WEB_4040}:4040
+    environment:
+      # - CONTEXT_PATH=<URL_BASE> #optional
+      # - JAVA_OPTS=<options> #optional
+      - TZ=${TZ}
+      - PUID=${PUID}
+      - PGID=${PGID}
+    volumes:
+      # - </path/to/config>:/config
+      # - </path/to/music>:/music
+      # - </path/to/playlists>:/playlists
+      # - </path/to/podcasts>:/podcasts
+      # - </path/to/other media>:/media #optional
+      - ${BASE_DATA_DIR}/airsonic:/config
+      - ${BASE_DATA_DIR}/airsonic/playlists:/playlists
+      - ${MEDIA_LIB_DIR}/Music:/music
+      - ${MEDIA_LIB_DIR}/Podcasts:/podcasts
+      - ${MEDIA_LIB_DIR}:/storage
+      - ${MEDIA_LIB_DIR}:/media
+      
+      - ${BASE_CACHE_DIR}/airsonic/cache:/cache
+      - ${BASE_CACHE_DIR}/airsonic/transcode:/transcoding
+
+
+########### Books
 
 # https://github.com/hectorqin/reader/blob/master/docker-compose.yaml
 # https://raw.githubusercontent.com/XIU2/Yuedu/master/shuyuan
@@ -151,6 +209,7 @@ services:
     image: hectorqin/reader
     #image: hectorqin/reader:openj9-latest #docker镜像，arm64架构和小内存机器可以使用
     container_name: reader
+    profiles: ["disabled"]
     logging:
       driver: json-file
       options:
@@ -166,6 +225,7 @@ services:
         # reservations:  #保留最小资源
         #   cpus: 0.25
         #   memory: 256M
+    entrypoint: java -jar /app/bin/reader.jar
     ports:
       - ${READER_WEB_8080}:8080 #4396端口映射可自行修改
     volumes:
@@ -194,3 +254,31 @@ services:
       - READER_APP_SECURE=true #开启登录鉴权，开启后将支持多用户模式
       - READER_APP_SECUREKEY=${READER_APP_SECUREKEY:-admin}  #管理员密码  建议修改
       - READER_APP_INVITECODE=${READER_APP_INVITECODE:-} #注册邀请码 建议修改,如不需要可注释或删除
+
+
+
+  # lazylibrarian
+  lazylibrarian:
+    image: lscr.io/linuxserver/lazylibrarian:latest
+    container_name: lazylibrarian
+    # user: ${PUID}:${PGID}
+    environment:
+      - PGID=${PGID}
+      - PUID=${PUID}
+      - UMASK=${UMASK}
+      - TZ=${TZ}
+      - DOCKER_MODS=linuxserver/calibre-web:calibre|linuxserver/mods:lazylibrarian-ffmpeg #optional
+    logging:
+      driver: json-file
+      options:
+        max-file: ${BASE_LOGGING_MAXFILE}
+        max-size: ${BASE_LOGGING_MAXSIZE}
+    restart: ${BASE_RESTART_STRATEGY}
+    volumes:
+      - ${BASE_DATA_DIR}/lazylibrarian:/config
+      - ${BASE_CACHE_DIR}/lazylibrarian:/config/log
+      - ${MEDIA_LIB_DIR}:/storage
+      - ${MEDIA_LIB_DIR}:/downloads
+    ports:
+      - ${LAZY_LIBRARIAN_5299}:5299
+

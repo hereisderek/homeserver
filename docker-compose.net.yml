@@ -6,6 +6,12 @@ services:
     ports:
       - ${SQUID_PORT_3128}:3128
     container_name: squid
+    profiles: ["disabled"]
+    deploy:
+      resources:
+        limits: 
+          cpus: '0.30'
+          memory: 256M
     environment:
       - TZ=${TZ}
     logging:
@@ -24,6 +30,7 @@ services:
 
   # https://docs.linuxserver.io/images/docker-wireguard
   wireguard_server:
+    profiles: ["disabled"]
     image: linuxserver/wireguard:latest
     container_name: wireguard_server
     ports:
@@ -57,6 +64,56 @@ services:
       - /lib/modules:/lib/modules
       - /etc/localtime:/etc/localtime:ro
       - ${BASE_DATA_DIR}/wireguard:/config
+
+
+
+  
+
+  # https://docs.linuxserver.io/images/docker-wireguard
+  wg_easy:
+    image: weejewel/wg-easy
+    container_name: wg_easy
+    # user: ${PUID}:${PGID}
+    ports:
+      - ${WIREGUARD_EASY_HOST_PORT_51820}:51820/udp
+      - ${WIREGUARD_EASY_WEB_PORT_51821}:51821/tcp
+    sysctls:
+      - net.ipv4.conf.all.src_valid_mark=1
+      - net.ipv6.conf.all.disable_ipv6=0
+      # following on the host
+      - net.ipv4.ip_forward=1
+      - net.ipv6.conf.all.forwarding=1
+    # entrypoint: sleep infinity
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    environment:
+      - PGID=${PGID}
+      - PUID=${PUID}
+      - UMASK=${UMASK}
+      - TZ=${TZ}
+
+      - WG_HOST=${WIREGUARD_EASY_HOST}
+      - WG_PORT=${WIREGUARD_EASY_HOST_PORT_51820}
+      - PASSWORD=${WIREGUARD_EASY_PASSWORD:-admin}
+      - WG_DEFAULT_ADDRESS=${WIREGUARD_EASY_ADDRESS:-}
+      - WG_DEFAULT_DNS=${WIREGUARD_EASY_DEFAULT_DNS:-}
+      - WG_ALLOWED_IPS=${WIREGUARD_EASY_ALLOWED_IPS:-}
+
+    logging:
+      driver: json-file
+      options:
+        max-file: ${BASE_LOGGING_MAXFILE}
+        max-size: ${BASE_LOGGING_MAXSIZE}
+    restart: ${BASE_RESTART_STRATEGY}
+    volumes:
+      - ${BASE_DATA_DIR}/wireguard_easy:/etc/wireguard
+      - /usr/src:/usr/src # for kernel moduel
+      - /lib/modules:/lib/modules
+      - /etc/localtime:/etc/localtime:ro
+    
+  
+      
 
   # wireguard_server_ui:
   #   image: embarkstudios/wireguard-ui:latest

@@ -1,0 +1,46 @@
+services:
+  qq_music_api:
+    container_name: qq_music_api
+    profiles: ["disabled"]
+    image: registry.cn-hangzhou.aliyuncs.com/yumbo/qq_music_api:1.0
+    environment:
+      - QQ=''
+    logging:
+      driver: json-file
+      options:
+        max-file: ${BASE_LOGGING_MAXFILE}
+        max-size: ${BASE_LOGGING_MAXSIZE}
+    restart: ${BASE_RESTART_STRATEGY}
+    ports:
+      - ${QQ_MUSIC_API_3300}:3300
+
+
+  netease_music_api:
+    image: binaryify/netease_cloud_music_api
+    profiles: ["disabled"]
+    container_name: netease_music_api
+    logging:
+      driver: json-file
+      options:
+        max-file: ${BASE_LOGGING_MAXFILE}
+        max-size: ${BASE_LOGGING_MAXSIZE}
+    restart: ${BASE_RESTART_STRATEGY}
+    environment:
+      NODE_ENV: production
+    ports:
+      - ${NETEASE_MUSIC_API_3000}:3000
+
+  unblockneteasemusic:
+    image: nondanee/unblockneteasemusic
+    container_name: unblockneteasemusic
+    profiles: ["disabled"]
+    logging:
+      driver: json-file
+      options:
+        max-file: ${BASE_LOGGING_MAXFILE}
+        max-size: ${BASE_LOGGING_MAXSIZE}
+    restart: ${BASE_RESTART_STRATEGY}
+    environment:
+      NODE_ENV: production
+    ports:
+      - ${UNBLOCK_NETEASE_MUSIC_API_8080}:8080

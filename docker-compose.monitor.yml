@@ -1,0 +1,25 @@
+services:
+  
+  uptime_kuma:
+    image: louislam/uptime-kuma:1
+    ports:
+      - ${UPTIME_KUMA_3001}:3001
+    container_name: uptime_kuma
+    deploy:
+      resources:
+        limits: 
+          cpus: '0.30'
+          memory: 256M
+    environment:
+      - PGID=${PGID}
+      - PUID=${PUID}
+      - UMASK=${UMASK}
+      - TZ=${TZ}
+    logging:
+      driver: json-file
+      options:
+        max-file: ${BASE_LOGGING_MAXFILE}
+        max-size: ${BASE_LOGGING_MAXSIZE}
+    restart: ${BASE_RESTART_STRATEGY}
+    volumes:
+      - ${BASE_DATA_DIR}/uptime_kuma:/app/data
